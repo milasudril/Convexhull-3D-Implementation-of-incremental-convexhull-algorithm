@@ -8,8 +8,13 @@ int main()
   std::vector<Point3D> tests = \
     {{3,0,0}, {0,3,0}, {0,0,3}, {3,3,3}};
   ConvexHull C(tests);
-  std::cout<<"vertices (x, y, z, intensity)\n"; C.Print("vertice");
-  std::cout<<"faces\n";  C.Print("face");
+
+  auto const& verts = C.GetVertices();
+
+  for(size_t k = 0; k != std::size(verts); ++k)
+  {
+    printf("%.8g %.8g %.8g\n", verts[k].x, verts[k].y, verts[k].z);
+  }
 
   return 0;
 }

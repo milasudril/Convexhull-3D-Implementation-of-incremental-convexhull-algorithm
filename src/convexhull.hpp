@@ -24,6 +24,8 @@ THE SOFTWARE. */
 /* This work is an implementation of incremental convex hull algorithm from
 the book Computational Geometry in C by O'Rourke */
 
+//@ {"dependencies_extra":[{"ref":"./convexhull.o", "rel":"implementation"}]}
+
 #ifndef CONVEXHULL_HPP
 #define CONVEXHULL_HPP
 
@@ -88,12 +90,9 @@ class ConvexHull
 
     const std::list<Face>& GetFaces() const {return this->faces;};
 
-    const std::vector<Point3D> GetVertices() const \
+    const std::vector<Point3D>& GetVertices() const \
         {return this->exterior_points;};
     // Return exterior vertices than defines the convell hull
-
-    void Print(const std::string mode);
-    // mode {face, edge, vertice}
 
     size_t Size() const {return this->exterior_points.size();};
 
