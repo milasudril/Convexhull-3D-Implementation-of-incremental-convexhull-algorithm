@@ -36,37 +36,11 @@ struct Point3D {
   {
       return Point3D(x+pt.x, y+pt.y, z+pt.z);
   }
+
   Point3D operator -(const Point3D& pt) const
   {
       return Point3D(x-pt.x, y-pt.y, z-pt.z);
   }
-
-  std::string ToString() const
-  {
-    return std::to_string(x).substr(0,4) + ", " + 
-           std::to_string(y).substr(0,4) + ", " + 
-           std::to_string(z).substr(0,4) + ", " + 
-           std::to_string(intensity).substr(0,4);
-  };
-  
-  friend std::ostream& operator<<(std::ostream& os, const Point3D& p)
-  {
-    os << "["<< p.ToString() << "] ";
-    return os;
-  }
-  
 };
 
-typedef std::vector<Point3D> PointStack;
-
-struct point_hash
-{
-  std::size_t operator() (const Point3D& p) const
-  {
-      std::string sx, sy, sz;
-      sx = std::to_string(p.x);
-      sy = std::to_string(p.y);
-      sz = std::to_string(p.z);
-      return std::hash<std::string>{}(sx+sy+sz);
-  }
-};
+using PointStack = std::vector<Point3D>;

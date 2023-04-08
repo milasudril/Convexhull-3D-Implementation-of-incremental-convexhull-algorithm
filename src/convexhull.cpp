@@ -24,7 +24,20 @@ THE SOFTWARE. */
 /* This work is an implementation of incremental convex hull algorithm from
 the book Computational Geometry in C by O'Rourke */
 
+//@ {"target":{"name":"convexhull.o"}}
+
 #include "./convexhull.hpp"
+
+namespace
+{
+  struct point_hash
+  {
+    size_t operator()(Point3D x) const
+    {
+      return std::hash<double>{}(x.x) ^ std::hash<double>{}(x.y) ^ std::hash<double>{}(x.z);
+    }
+  };
+};
 
 size_t ConvexHull::Key2Edge(const Point3D& a, const Point3D& b) const
 {
@@ -88,15 +101,15 @@ bool ConvexHull::Colinear(const Point3D& a, const Point3D& b, const Point3D& c) 
 
 bool ConvexHull::BuildFirstHull(std::vector<Point3D>& pointcloud)
 {
-  const int n = pointcloud.size();
+  auto const n = pointcloud.size();
   if(n <= 3)
   {
     std::cout<<"Tetrahedron: points.size() < 4\n";
     return false;
   }
 
-  int i = 2;
-  while(this->Colinear(pointcloud[i], pointcloud[i-1], pointcloud[i-2]))
+  size_t i = 2;
+  while(this->Colinear(pointcloud[i], pointcloud[i - 1], pointcloud[i - 2]))
   {
     if(i++ == n - 1)
     {
@@ -107,7 +120,7 @@ bool ConvexHull::BuildFirstHull(std::vector<Point3D>& pointcloud)
 
   Face face(pointcloud[i], pointcloud[i-1], pointcloud[i-2]);
 
-  int j = i;
+  auto j = i;
   while(!this->VolumeSign(face, pointcloud[j]))
   {
     if(j++ == n-1)
@@ -136,6 +149,8 @@ Point3D ConvexHull::FindInnerPoint(const Face* f, const Edge& e)
     if(f->vertices[i] == e.endpoints[1]) continue;
     return f->vertices[i];
   }
+
+  abort();
 }
 
 void ConvexHull::IncreHull(const Point3D& pt)
@@ -146,8 +161,8 @@ void ConvexHull::IncreHull(const Point3D& pt)
   {
     if(VolumeSign(face, pt) < 0)
     {
-      //std::cout<<"face illuminated by pt "<<pt<<" is \n"<<face<<"\n";
-      face.visible = vis = true;
+      vis = true;
+      face.visible = true;
     }
   }
   if(!vis) return;
@@ -229,24 +244,3 @@ void ConvexHull::ExtractExteriorPoints()
   this->exterior_points = \
       std::vector<Point3D>(exterior_set.begin(), exterior_set.end());
 }
-
-void ConvexHull::Print(const std::string mode = "none")
-{
-  if(mode == "vertice")
-  {
-    for(const auto& pt : this->exterior_points)  std::cout<<pt<<"\n";
-  }
-  else if(mode == "edge")
-  {
-    for(const auto& e : this->edges)  std::cout<<(e)<<"\n";
-  }
-  else if( mode == "face")
-  {
-    for(const auto& f : this->faces)  std::cout<<f<<"\n";
-  }
-  else
-  {
-    std::cout<<"Print Usage: Print {'vertice', 'edge', 'face'}\n";
-  }
-}
-

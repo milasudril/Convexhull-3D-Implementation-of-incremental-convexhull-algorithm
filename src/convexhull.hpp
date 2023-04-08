@@ -44,14 +44,6 @@ struct Face
 
   void Reverse(){std::swap(vertices[0], vertices[2]); };
 
-  friend std::ostream& operator<<(std::ostream& os, const Face& f)
-  {
-    os << "[face pt1 = "   << f.vertices[0].ToString()
-       << " | face pt2 = " << f.vertices[1].ToString()
-       << " | face pt3 = " << f.vertices[2].ToString()<<"] ";
-    return os;
-  }
-
   bool visible;
   Point3D vertices[3];
 };
@@ -77,15 +69,9 @@ struct Edge
     (adjface1 == face ? adjface1 : adjface2) = nullptr;
   };
 
-  friend std::ostream& operator<<(std::ostream& os, const Edge& e)
-  {
-    os << "[edge pt1 = "   << e.endpoints[0].ToString()
-       << " | edge pt2 = " << e.endpoints[1].ToString() << " ]";
-    return os;
-  }
-
+  Face* adjface1;
+  Face* adjface2;
   bool remove;
-  Face *adjface1, *adjface2;
   Point3D endpoints[2];
 };
 
@@ -109,7 +95,7 @@ class ConvexHull
     void Print(const std::string mode);
     // mode {face, edge, vertice}
 
-    int Size() const {return this->exterior_points.size();};
+    size_t Size() const {return this->exterior_points.size();};
 
   private:
 
@@ -152,9 +138,9 @@ class ConvexHull
 
 template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
 {
-  const int n = points.size();
+  auto const n = points.size();
   this->pointcloud.resize(n);
-  for(int i = 0; i < n; i++)
+  for(size_t i = 0; i != n; i++)
   {
     this->pointcloud[i].x = points[i].x;
     this->pointcloud[i].y = points[i].y;

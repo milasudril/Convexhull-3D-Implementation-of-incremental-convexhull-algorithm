@@ -1,3 +1,5 @@
+//@ {"target":{"name":"plain_demo.o"}}
+
 #include "./convexhull.hpp"
 #include <vector>
 
