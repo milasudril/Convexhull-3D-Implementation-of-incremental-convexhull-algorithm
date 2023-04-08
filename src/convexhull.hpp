@@ -24,8 +24,10 @@ THE SOFTWARE. */
 /* This work is an implementation of incremental convex hull algorithm from
 the book Computational Geometry in C by O'Rourke */
 
-#ifndef CONVEXHULL_H
-#define CONVEXHULL_H
+#ifndef CONVEXHULL_HPP
+#define CONVEXHULL_HPP
+
+#include "./utility.hpp"
 
 #include <vector>
 #include <string>
@@ -33,8 +35,6 @@ the book Computational Geometry in C by O'Rourke */
 #include <unordered_map>
 #include <unordered_set>
 #include <list>
-#include "utility.h"
-
 
 // Defined in CCW
 struct Face
@@ -58,11 +58,11 @@ struct Face
 
 struct Edge
 {
-  Edge(const Point3D& p1, const Point3D& p2): 
-      adjface1(nullptr), adjface2(nullptr), remove(false) 
+  Edge(const Point3D& p1, const Point3D& p2):
+      adjface1(nullptr), adjface2(nullptr), remove(false)
       { endpoints[0] = p1; endpoints[1] = p2; };
-  
-  void LinkAdjFace(Face* face) 
+
+  void LinkAdjFace(Face* face)
   {
     if( adjface1 != NULL && adjface2 != NULL )
     {
@@ -71,7 +71,7 @@ struct Edge
     (adjface1 == NULL ? adjface1 : adjface2)= face;
   };
 
-  void Erase(Face* face) 
+  void Erase(Face* face)
   {
     if(adjface1 != face && adjface2 != face) return;
     (adjface1 == face ? adjface1 : adjface2) = nullptr;
@@ -84,7 +84,7 @@ struct Edge
     return os;
   }
 
-  bool remove; 
+  bool remove;
   Face *adjface1, *adjface2;
   Point3D endpoints[2];
 };
@@ -101,7 +101,7 @@ class ConvexHull
     // In out test for a query point (surface point is considered outside)
 
     const std::list<Face>& GetFaces() const {return this->faces;};
-    
+
     const std::vector<Point3D> GetVertices() const \
         {return this->exterior_points;};
     // Return exterior vertices than defines the convell hull
@@ -124,7 +124,7 @@ class ConvexHull
     size_t Key2Edge(const Point3D& a, const Point3D& b) const;
     // Hash key for edge. hash(a, b) = hash(b, a)
 
-    void AddOneFace(const Point3D& a, const Point3D& b, 
+    void AddOneFace(const Point3D& a, const Point3D& b,
         const Point3D& c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
@@ -155,7 +155,7 @@ template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
   const int n = points.size();
   this->pointcloud.resize(n);
   for(int i = 0; i < n; i++)
-  { 
+  {
     this->pointcloud[i].x = points[i].x;
     this->pointcloud[i].y = points[i].y;
     this->pointcloud[i].z = points[i].z;

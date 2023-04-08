@@ -24,7 +24,7 @@ THE SOFTWARE. */
 /* This work is an implementation of incremental convex hull algorithm from
 the book Computational Geometry in C by O'Rourke */
 
-#include "convexhull.h"
+#include "./convexhull.hpp"
 
 size_t ConvexHull::Key2Edge(const Point3D& a, const Point3D& b) const
 {
@@ -36,14 +36,14 @@ int ConvexHull::VolumeSign(const Face& f, const Point3D& p) const
 {
   double vol;
   double ax, ay, az, bx, by, bz, cx, cy, cz;
-  ax = f.vertices[0].x - p.x;  
-  ay = f.vertices[0].y - p.y;  
+  ax = f.vertices[0].x - p.x;
+  ay = f.vertices[0].y - p.y;
   az = f.vertices[0].z - p.z;
-  bx = f.vertices[1].x - p.x;  
-  by = f.vertices[1].y - p.y;  
+  bx = f.vertices[1].x - p.x;
+  by = f.vertices[1].y - p.y;
   bz = f.vertices[1].z - p.z;
-  cx = f.vertices[2].x - p.x;  
-  cy = f.vertices[2].y - p.y;  
+  cx = f.vertices[2].x - p.x;
+  cy = f.vertices[2].y - p.y;
   cz = f.vertices[2].z - p.z;
   vol = ax * (by * cz - bz * cy) +\
         ay * (bz * cx - bx * cz) +\
@@ -52,7 +52,7 @@ int ConvexHull::VolumeSign(const Face& f, const Point3D& p) const
   return vol < 0 ? -1 : 1;
 }
 
-void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b, 
+void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b,
     const Point3D& c, const Point3D& inner_pt)
 {
   // Make sure face is CCW with face normal pointing outward
@@ -64,8 +64,8 @@ void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b,
   auto create_edge = [&](const Point3D& p1, const Point3D& p2)
   {
     size_t key = this->Key2Edge(p1, p2);
-    if(!this->map_edges.count(key)) 
-    { 
+    if(!this->map_edges.count(key))
+    {
       this->edges.emplace_back(p1, p2);
       this->map_edges.insert({key, &this->edges.back()});
     }
@@ -78,11 +78,11 @@ void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b,
 
 bool ConvexHull::Colinear(const Point3D& a, const Point3D& b, const Point3D& c) const
 {
-  return ((c.z - a.z) * (b.y - a.y) - 
+  return ((c.z - a.z) * (b.y - a.y) -
           (b.z - a.z) * (c.y - a.y)) == 0 &&\
-         ((b.z - a.z) * (c.x - a.x) - 
+         ((b.z - a.z) * (c.x - a.x) -
           (b.x - a.x) * (c.z - a.z)) == 0 &&\
-         ((b.x - a.x) * (c.y - a.y) - 
+         ((b.x - a.x) * (c.y - a.y) -
           (b.y - a.y) * (c.x - a.x)) == 0;
 }
 
@@ -92,7 +92,7 @@ bool ConvexHull::BuildFirstHull(std::vector<Point3D>& pointcloud)
   if(n <= 3)
   {
     std::cout<<"Tetrahedron: points.size() < 4\n";
-    return false;    
+    return false;
   }
 
   int i = 2;
@@ -113,7 +113,7 @@ bool ConvexHull::BuildFirstHull(std::vector<Point3D>& pointcloud)
     if(j++ == n-1)
     {
       std::cout<<"Tetrahedron: All pointcloud are coplanar!\n";
-      return false;    
+      return false;
     }
   }
 
@@ -127,7 +127,7 @@ bool ConvexHull::BuildFirstHull(std::vector<Point3D>& pointcloud)
   return true;
 
 }
- 
+
 Point3D ConvexHull::FindInnerPoint(const Face* f, const Edge& e)
 {
   for(int i = 0; i < 3; i++)
@@ -135,7 +135,7 @@ Point3D ConvexHull::FindInnerPoint(const Face* f, const Edge& e)
     if(f->vertices[i] == e.endpoints[0]) continue;
     if(f->vertices[i] == e.endpoints[1]) continue;
     return f->vertices[i];
-  } 
+  }
 }
 
 void ConvexHull::IncreHull(const Point3D& pt)
@@ -144,7 +144,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
   bool vis = false;
   for(auto& face : this->faces)
   {
-    if(VolumeSign(face, pt) < 0) 
+    if(VolumeSign(face, pt) < 0)
     {
       //std::cout<<"face illuminated by pt "<<pt<<" is \n"<<face<<"\n";
       face.visible = vis = true;
@@ -165,15 +165,15 @@ void ConvexHull::IncreHull(const Point3D& pt)
       continue;
     }
 
-    // This edge is to be removed because two adjacent faces will be removed 
-    else if(face1->visible && face2->visible) 
+    // This edge is to be removed because two adjacent faces will be removed
+    else if(face1->visible && face2->visible)
     {
       edge.remove = true;
     }
 
     // Edge on the boundary of visibility, which will be used to extend a tagent
     // cone surface.
-    else if(face1->visible|| face2->visible) 
+    else if(face1->visible|| face2->visible)
     {
       if(face1->visible) std::swap(face1, face2);
       auto inner_pt = this->FindInnerPoint(face2, edge);
@@ -235,7 +235,7 @@ void ConvexHull::Print(const std::string mode = "none")
   if(mode == "vertice")
   {
     for(const auto& pt : this->exterior_points)  std::cout<<pt<<"\n";
-  }    
+  }
   else if(mode == "edge")
   {
     for(const auto& e : this->edges)  std::cout<<(e)<<"\n";
