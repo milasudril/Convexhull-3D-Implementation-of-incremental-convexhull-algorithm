@@ -12,10 +12,13 @@ struct Point3D {
   Point3D(float _x, float _y, float _z, float _i):\
       x(_x), y(_y), z(_z), intensity(_i), processed(false) {}
 
-  bool operator ==(const Point3D& pt) const
+  constexpr bool operator ==(const Point3D& pt) const
   {
       return x == pt.x && y == pt.y && z == pt.z;
   }
+
+  constexpr bool operator !=(const Point3D& pt) const
+  { return !(*this == pt); }
 
   float operator *(const Point3D& pt) const
   {

@@ -61,8 +61,14 @@ struct Edge
     if( adjface1 != NULL && adjface2 != NULL )
     {
       std::cout<<"warning: property violated!\n";
+      abort();
     }
-    (adjface1 == NULL ? adjface1 : adjface2)= face;
+
+    if(adjface1 == nullptr)
+    { adjface1 = face; }
+    else
+    { adjface2 = face; }
+
   };
 
   void Erase(Face* face)
@@ -132,7 +138,33 @@ class ConvexHull
     std::vector<Point3D> exterior_points = {};
     std::list<Face> faces = {};
     std::list<Edge> edges = {};
-    std::unordered_map<size_t, Edge*> map_edges;
+
+    struct PointHash
+    {
+      size_t operator()(Point3D a) const
+      {
+        return std::hash<double>{}(a.x) ^ std::hash<double>{}(a.y) ^ std::hash<double>{}(a.z);
+      }
+    };
+
+    struct EdgeEndpoints
+    {
+      Point3D p1;
+      Point3D p2;
+
+      constexpr bool operator==(const EdgeEndpoints&) const = default;
+      constexpr bool operator!=(const EdgeEndpoints&) const = default;
+    };
+
+    struct EdgeEndpointHash
+    {
+      size_t operator()(EdgeEndpoints const& a) const
+      {
+        return PointHash{}(a.p1) ^ PointHash{}(a.p2);
+      }
+    };
+
+    std::unordered_map<EdgeEndpoints, Edge*, EdgeEndpointHash> map_edges;
 };
 
 template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)

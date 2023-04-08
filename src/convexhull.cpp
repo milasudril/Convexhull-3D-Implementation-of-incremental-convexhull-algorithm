@@ -28,23 +28,6 @@ the book Computational Geometry in C by O'Rourke */
 
 #include "./convexhull.hpp"
 
-namespace
-{
-  struct point_hash
-  {
-    size_t operator()(Point3D x) const
-    {
-      return std::hash<double>{}(x.x) ^ std::hash<double>{}(x.y) ^ std::hash<double>{}(x.z);
-    }
-  };
-};
-
-size_t ConvexHull::Key2Edge(const Point3D& a, const Point3D& b) const
-{
-  point_hash ph;
-  return ph(a) ^ ph(b);
-}
-
 int ConvexHull::VolumeSign(const Face& f, const Point3D& p) const
 {
   double vol;
@@ -76,7 +59,7 @@ void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b,
   // Create edges and link them to face pointer
   auto create_edge = [&](const Point3D& p1, const Point3D& p2)
   {
-    size_t key = this->Key2Edge(p1, p2);
+    auto const key = EdgeEndpoints{p1, p2};
     if(!this->map_edges.count(key))
     {
       this->edges.emplace_back(p1, p2);
@@ -219,7 +202,7 @@ void ConvexHull::CleanUp()
     {
       auto pt1 = it_edge->endpoints[0];
       auto pt2 = it_edge->endpoints[1];
-      auto key_to_evict = this->Key2Edge(pt1, pt2);
+      auto key_to_evict = EdgeEndpoints{pt1, pt2};
       this->map_edges.erase(key_to_evict);
       this->edges.erase(it_edge++);
     }
@@ -233,9 +216,10 @@ void ConvexHull::CleanUp()
   }
 }
 
+
 void ConvexHull::ExtractExteriorPoints()
 {
-  std::unordered_set<Point3D, point_hash> exterior_set;
+  std::unordered_set<Point3D, PointHash> exterior_set;
   for(const auto& f : this->faces)
   {
     for(int i =0; i < 3; i++)
