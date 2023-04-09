@@ -139,14 +139,6 @@ class ConvexHull
     std::list<Face> faces = {};
     std::list<Edge> edges = {};
 
-    struct PointHash
-    {
-      size_t operator()(Point3D a) const
-      {
-        return std::hash<double>{}(a.x) ^ std::hash<double>{}(a.y) ^ std::hash<double>{}(a.z);
-      }
-    };
-
     struct EdgeEndpoints
     {
       Point3D p1;

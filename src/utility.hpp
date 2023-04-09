@@ -47,3 +47,11 @@ struct Point3D {
 };
 
 using PointStack = std::vector<Point3D>;
+
+struct PointHash
+{
+    size_t operator()(Point3D a) const
+    {
+    return std::hash<float>{}(a.x) ^ std::hash<float>{}(a.y) ^ std::hash<float>{}(a.z);
+    }
+};
