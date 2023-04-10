@@ -153,7 +153,6 @@ void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
     this->IncreHull(pt);
     this->CleanUp();
   }
-  this->ExtractExteriorPoints();
 }
 
 void ConvexHull::CleanUp()
@@ -177,19 +176,4 @@ void ConvexHull::CleanUp()
     if(it_face->visible) this->faces.erase(it_face++);
     else it_face++;
   }
-}
-
-
-void ConvexHull::ExtractExteriorPoints()
-{
-  /*
-  std::unordered_set<Point3D, PointHash> exterior_set;
-  for(const auto& f : this->faces)
-  {
-    for(int i =0; i < 3; i++)
-      exterior_set.insert(f.vertices[i]);
-  }
-  this->exterior_points = \
-      std::vector<Point3D>(exterior_set.begin(), exterior_set.end());
-      */
 }

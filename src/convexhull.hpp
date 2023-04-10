@@ -161,22 +161,12 @@ class ConvexHull
 
     ~ConvexHull() = default;
 
-    template<typename T> bool Contains(T p) const;
-    // In out test for a query point (surface point is considered outside)
-
     const std::list<Face>& GetFaces() const {return this->faces;};
 
     const std::vector<Point3D>& GetVertices() const \
         {return this->pointcloud;};
-    // Return exterior vertices than defines the convell hull
-
-    size_t Size() const {return this->exterior_points.size();};
 
   private:
-
-    size_t Key2Edge(const Point3D& a, const Point3D& b) const;
-    // Hash key for edge. hash(a, b) = hash(b, a)
-
     void AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
@@ -190,10 +180,7 @@ class ConvexHull
 
     void CleanUp();
 
-    void ExtractExteriorPoints();
-
     std::vector<Point3D> pointcloud = {};
-    std::vector<Point3D> exterior_points = {};
     std::list<Face> faces = {};
     std::list<Edge> edges = {};
 
