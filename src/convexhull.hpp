@@ -168,6 +168,7 @@ class ConvexHull
 
   private:
     void AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
+    void AddOneFace(Edge& current_edge, vertex_index c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 

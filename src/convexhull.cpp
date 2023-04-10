@@ -28,9 +28,36 @@ the book Computational Geometry in C by O'Rourke */
 
 #include "./convexhull.hpp"
 
-void ConvexHull::AddOneFace(vertex_index a, vertex_index b,
-    vertex_index c, const Point3D& inner_pt)
+void ConvexHull::AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt)
 {
+  // Make sure face is CCW with face normal pointing outward
+  this->faces.emplace_back(Face{a, b, c});
+  auto& new_face = this->faces.back();
+  if(VolumeSign(std::data(std::as_const(*this).pointcloud),
+    std::as_const(new_face), inner_pt) < 0)
+  { new_face.flip(); }
+
+  // Create edges and link them to face pointer
+  auto create_edge = [&](vertex_index p1, vertex_index p2)
+  {
+    auto const key = EdgeEndpoints{p1, p2};
+    if(!this->map_edges.count(key))
+    {
+      this->edges.emplace_back(p1, p2);
+      this->map_edges.insert({key, &this->edges.back()});
+    }
+    this->map_edges[key]->LinkAdjFace(&new_face);
+  };
+  create_edge(a, b);
+  create_edge(a, c);
+  create_edge(b, c);
+}
+
+void ConvexHull::AddOneFace(Edge& current_edge, vertex_index c, const Point3D& inner_pt)
+{
+  auto const a = current_edge.endpoints[0];
+  auto const b = current_edge.endpoints[1];
+
   // Make sure face is CCW with face normal pointing outward
   this->faces.emplace_back(Face{a, b, c});
   auto& new_face = this->faces.back();
@@ -136,8 +163,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
       if(face1->visible) std::swap(face1, face2);
       auto inner_pt = FindInnerPoint(*face2, edge);
       edge.Erase(face2);
-      this->AddOneFace(edge.endpoints[0],
-        edge.endpoints[1],
+      this->AddOneFace(edge,
         vertex_index{&pt, std::data(std::as_const(*this).pointcloud)},
         *(std::data(std::as_const(*this).pointcloud) + inner_pt));
     }
