@@ -149,7 +149,7 @@ struct edgeData
     { adjface2 = face; }
   }
 
-  void Erase(face const* face)
+  void erase(face const* face)
   {
     assert(adjface1 == face || adjface2 == face);
 
