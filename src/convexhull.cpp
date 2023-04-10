@@ -30,7 +30,7 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <stdexcept>
 
-void ConvexHull::AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt)
+void ConvexHull::insert_face(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt)
 {
   // Make sure face is CCW with face normal pointing outward
   this->faces.emplace_back(Face{a, b, c});
@@ -50,7 +50,7 @@ void ConvexHull::AddOneFace(vertex_index a, vertex_index b, vertex_index c, cons
   create_edge(b, c);
 }
 
-void ConvexHull::AddOneFace(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt)
+void ConvexHull::insert_face(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt)
 {
   auto const a = current_edge.first.endpoints[0];
   auto const b = current_edge.first.endpoints[1];
@@ -99,10 +99,10 @@ void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
   auto& p1 = pointcloud[i];    auto& p2 = pointcloud[i - 1];
   auto& p3 = pointcloud[i - 2];  auto& p4 = pointcloud[j];
   p1.processed = p2.processed = p3.processed = p4.processed = true;
-  this->AddOneFace(vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
-  this->AddOneFace(vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
-  this->AddOneFace(vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
-  this->AddOneFace(vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
+  this->insert_face(vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
+  this->insert_face(vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
+  this->insert_face(vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
+  this->insert_face(vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
 size_t mark_visible_faces(std::list<Face>& faces, std::span<Point3D const> points, Point3D const& ref)
@@ -150,7 +150,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
       { std::swap(face1, face2); }
       auto const inner_pt = FindInnerPoint(*face2, edge.first);
       edge.second.Erase(face2);
-      this->AddOneFace(edge,
+      this->insert_face(edge,
         vertex_index{&pt, std::data(std::as_const(*this).pointcloud)},
         *(std::data(std::as_const(*this).pointcloud) + inner_pt));
     }
