@@ -1,0 +1,4 @@
+{
+	"target":{"name":"convhull"}
+	,"dependencies":[{"ref":"./convhull.o", "rel":"implementation"}]
+}

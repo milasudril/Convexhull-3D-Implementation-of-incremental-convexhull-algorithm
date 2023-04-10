@@ -1,4 +1,0 @@
-{
-	"target":{"name":"plain_demo"}
-	,"dependencies":[{"ref":"./plain_demo.o", "rel":"implementation"}]
-}

@@ -1,4 +1,4 @@
-//@ {"target":{"name":"plain_demo.o"}}
+//@ {"target":{"name":"convhull.o"}}
 
 #include "./builder.hpp"
 
