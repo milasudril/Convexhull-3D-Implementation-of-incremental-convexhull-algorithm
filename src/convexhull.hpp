@@ -110,10 +110,21 @@ inline auto VolumeSign(Point3D const* vert_array, Face const& f, Point3D const& 
 
 struct Edge
 {
-  explicit Edge(vertex_index p1, vertex_index p2):
+  constexpr explicit Edge(vertex_index p1, vertex_index p2):
+    endpoints{p1, p2}
+  {}
+
+  std::array<vertex_index, 2> endpoints;
+
+  constexpr bool operator==(Edge const&) const = default;
+  constexpr bool operator!=(Edge const&) const = default;
+};
+
+struct EdgeData
+{
+  explicit EdgeData():
     adjface1{nullptr},
     adjface2{nullptr},
-    endpoints{p1, p2},
     remove{false}
   {}
 
@@ -135,7 +146,6 @@ struct Edge
 
   Face* adjface1;
   Face* adjface2;
-  std::array<vertex_index, 2> endpoints;
   bool remove;
 };
 
@@ -168,7 +178,7 @@ class ConvexHull
 
   private:
     void AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
-    void AddOneFace(Edge& current_edge, vertex_index c, const Point3D& inner_pt);
+    void AddOneFace(std::pair<Edge, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 
@@ -183,26 +193,17 @@ class ConvexHull
 
     std::vector<Point3D> pointcloud = {};
     std::list<Face> faces = {};
-    std::list<Edge> edges = {};
-
-    struct EdgeEndpoints
-    {
-      vertex_index p1;
-      vertex_index p2;
-
-      constexpr bool operator==(const EdgeEndpoints&) const = default;
-      constexpr bool operator!=(const EdgeEndpoints&) const = default;
-    };
+    std::list<std::pair<Edge, EdgeData>> edges = {};
 
     struct EdgeEndpointHash
     {
-      size_t operator()(EdgeEndpoints const& a) const
+      size_t operator()(Edge const& a) const
       {
         return std::hash<size_t>{}(std::bit_cast<size_t>(a));
       }
     };
 
-    std::unordered_map<EdgeEndpoints, Edge*, EdgeEndpointHash> map_edges;
+    std::unordered_map<Edge, EdgeData*, EdgeEndpointHash> map_edges;
 };
 
 template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)

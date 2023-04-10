@@ -40,11 +40,11 @@ void ConvexHull::AddOneFace(vertex_index a, vertex_index b, vertex_index c, cons
   // Create edges and link them to face pointer
   auto create_edge = [&](vertex_index p1, vertex_index p2)
   {
-    auto const key = EdgeEndpoints{p1, p2};
+    auto const key = Edge{p1, p2};
     if(!this->map_edges.count(key))
     {
-      this->edges.emplace_back(p1, p2);
-      this->map_edges.insert({key, &this->edges.back()});
+      this->edges.emplace_back(std::pair{key, EdgeData{}});
+      this->map_edges.insert({key, &this->edges.back().second});
     }
     this->map_edges[key]->LinkAdjFace(&new_face);
   };
@@ -53,10 +53,10 @@ void ConvexHull::AddOneFace(vertex_index a, vertex_index b, vertex_index c, cons
   create_edge(b, c);
 }
 
-void ConvexHull::AddOneFace(Edge& current_edge, vertex_index c, const Point3D& inner_pt)
+void ConvexHull::AddOneFace(std::pair<Edge, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt)
 {
-  auto const a = current_edge.endpoints[0];
-  auto const b = current_edge.endpoints[1];
+  auto const a = current_edge.first.endpoints[0];
+  auto const b = current_edge.first.endpoints[1];
 
   // Make sure face is CCW with face normal pointing outward
   this->faces.emplace_back(Face{a, b, c});
@@ -68,16 +68,16 @@ void ConvexHull::AddOneFace(Edge& current_edge, vertex_index c, const Point3D& i
   // Create edges and link them to face pointer
   auto create_edge = [&](vertex_index p1, vertex_index p2)
   {
-    auto const key = EdgeEndpoints{p1, p2};
+    auto const key = Edge{p1, p2};
     if(!this->map_edges.count(key))
     {
-      this->edges.emplace_back(p1, p2);
-      this->map_edges.insert({key, &this->edges.back()});
+      this->edges.emplace_back(std::pair{key, EdgeData{}});
+      this->map_edges.insert({key, &this->edges.back().second});
     }
     this->map_edges[key]->LinkAdjFace(&new_face);
   };
 
-  current_edge.LinkAdjFace(&new_face);
+  current_edge.second.LinkAdjFace(&new_face);
   create_edge(a, c);
   create_edge(b, c);
 }
@@ -142,8 +142,8 @@ void ConvexHull::IncreHull(const Point3D& pt)
   for(auto it = this->edges.begin(); it != this->edges.end(); it++)
   {
     auto& edge = *it;
-    auto& face1 = edge.adjface1;
-    auto& face2 = edge.adjface2;
+    auto& face1 = edge.second.adjface1;
+    auto& face2 = edge.second.adjface2;
 
     // Newly added edge
     if(face1 == nullptr || face2 == nullptr)
@@ -154,7 +154,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
     // This edge is to be removed because two adjacent faces will be removed
     else if(face1->visible && face2->visible)
     {
-      edge.remove = true;
+      edge.second.remove = true;
     }
 
     // Edge on the boundary of visibility, which will be used to extend a tagent
@@ -162,8 +162,8 @@ void ConvexHull::IncreHull(const Point3D& pt)
     else if(face1->visible|| face2->visible)
     {
       if(face1->visible) std::swap(face1, face2);
-      auto inner_pt = FindInnerPoint(*face2, edge);
-      edge.Erase(face2);
+      auto inner_pt = FindInnerPoint(*face2, edge.first);
+      edge.second.Erase(face2);
       this->AddOneFace(edge,
         vertex_index{&pt, std::data(std::as_const(*this).pointcloud)},
         *(std::data(std::as_const(*this).pointcloud) + inner_pt));
@@ -187,12 +187,9 @@ void ConvexHull::CleanUp()
   auto it_edge = this->edges.begin();
   while(it_edge != this->edges.end())
   {
-    if(it_edge->remove)
+    if(it_edge->second.remove)
     {
-      auto pt1 = it_edge->endpoints[0];
-      auto pt2 = it_edge->endpoints[1];
-      auto key_to_evict = EdgeEndpoints{pt1, pt2};
-      this->map_edges.erase(key_to_evict);
+      this->map_edges.erase(it_edge->first);
       this->edges.erase(it_edge++);
     }
     else it_edge++;
