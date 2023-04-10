@@ -149,11 +149,15 @@ struct EdgeData
     { adjface2 = face; }
   }
 
-  void Erase(Face* face)
+  void Erase(Face const* face)
   {
-    if(adjface1 != face && adjface2 != face) return;
-    (adjface1 == face ? adjface1 : adjface2) = nullptr;
-  };
+    assert(adjface1 == face || adjface2 == face);
+
+    if(adjface1 == face)
+    { adjface1 = nullptr; }
+    else
+    { adjface2 = nullptr; }
+  }
 
   Face* adjface1;
   Face* adjface2;
