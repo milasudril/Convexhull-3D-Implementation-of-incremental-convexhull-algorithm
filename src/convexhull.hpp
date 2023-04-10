@@ -106,6 +106,19 @@ inline auto VolumeSign(Point3D const* vert_array, Face const& f, Point3D const& 
   return vol < 0 ? -1 : 1;
 }
 
+inline auto make_oriented_face(Point3D const* vert_array,
+  vertex_index a,
+  vertex_index b,
+  vertex_index c,
+  Point3D const& ref)
+{
+  Face ret{a, b, c};
+  if(VolumeSign(vert_array, ret, ref) < 0)
+  { ret.flip(); }
+
+  return ret;
+}
+
 struct Edge
 {
   constexpr explicit Edge(vertex_index p1, vertex_index p2):

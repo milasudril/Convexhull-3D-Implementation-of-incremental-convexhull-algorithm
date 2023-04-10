@@ -30,14 +30,10 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <stdexcept>
 
-void ConvexHull::insert_face(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt)
+void ConvexHull::insert_face(vertex_index a, vertex_index b, vertex_index c, const Point3D& ref)
 {
-  // Make sure face is CCW with face normal pointing outward
-  this->faces.emplace_back(Face{a, b, c});
+  faces.emplace_back(make_oriented_face(std::data(std::as_const(*this).pointcloud), a, b, c, ref));
   auto& new_face = this->faces.back();
-  if(VolumeSign(std::data(std::as_const(*this).pointcloud),
-    std::as_const(new_face), inner_pt) < 0)
-  { new_face.flip(); }
 
   // Create edges and link them to face pointer
   auto create_edge = [&](vertex_index p1, vertex_index p2)
@@ -50,17 +46,13 @@ void ConvexHull::insert_face(vertex_index a, vertex_index b, vertex_index c, con
   create_edge(b, c);
 }
 
-void ConvexHull::insert_face(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt)
+void ConvexHull::insert_face(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& ref)
 {
   auto const a = current_edge.first.endpoints[0];
   auto const b = current_edge.first.endpoints[1];
 
-  // Make sure face is CCW with face normal pointing outward
-  this->faces.emplace_back(Face{a, b, c});
+  faces.emplace_back(make_oriented_face(std::data(std::as_const(*this).pointcloud), a, b, c, ref));
   auto& new_face = this->faces.back();
-  if(VolumeSign(std::data(std::as_const(*this).pointcloud),
-    std::as_const(new_face), inner_pt) < 0)
-  { new_face.flip(); }
 
   // Create edges and link them to face pointer
   auto create_edge = [&](vertex_index p1, vertex_index p2)
