@@ -68,7 +68,7 @@ constexpr auto operator+(Point3D const* ptr, vertex_index vi)
 }
 
 
-struct Face
+struct face
 {
   std::array<vertex_index, 3> vertices;
   bool visible{false};
@@ -79,7 +79,7 @@ struct Face
 
 // A point is considered outside of a CCW face if the volume of tetrahedron
 // formed by the face and point is negative. Note that origin is set at p.
-inline auto VolumeSign(Point3D const* vert_array, Face const& f, Point3D const& p)
+inline auto VolumeSign(Point3D const* vert_array, face const& f, Point3D const& p)
 {
   double vol;
   double ax, ay, az, bx, by, bz, cx, cy, cz;
@@ -112,7 +112,7 @@ inline auto make_oriented_face(Point3D const* vert_array,
   vertex_index c,
   Point3D const& ref)
 {
-  Face ret{a, b, c};
+  face ret{a, b, c};
   if(VolumeSign(vert_array, ret, ref) < 0)
   { ret.flip(); }
 
@@ -139,7 +139,7 @@ struct EdgeData
     to_be_removed{false}
   {}
 
-  void link_face(Face* face)
+  void link_face(face* face)
   {
     assert(adjface1 == nullptr || adjface2 == nullptr);
 
@@ -149,7 +149,7 @@ struct EdgeData
     { adjface2 = face; }
   }
 
-  void Erase(Face const* face)
+  void Erase(face const* face)
   {
     assert(adjface1 == face || adjface2 == face);
 
@@ -159,8 +159,8 @@ struct EdgeData
     { adjface2 = nullptr; }
   }
 
-  Face* adjface1;
-  Face* adjface2;
+  face* adjface1;
+  face* adjface2;
   bool to_be_removed;
 };
 
@@ -176,14 +176,14 @@ struct edge_cmp
 
 using edge_map = std::map<Edge, EdgeData, edge_cmp>;
 
-inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, Face& face)
+inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, face& face)
 {
   auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
   i.first->second.link_face(&face);
 }
 
 // for face(a,b,c) and edge(a,c), return b
-inline auto FindInnerPoint(const Face& f, const Edge& e)
+inline auto FindInnerPoint(const face& f, const Edge& e)
 {
   for(size_t i = 0; i != std::size(f.vertices); i++)
   {
@@ -203,14 +203,14 @@ class ConvexHull
 
     ~ConvexHull() = default;
 
-    const std::list<Face>& GetFaces() const {return this->faces;};
+    const std::list<face>& faces() const {return m_faces;}
 
-    const std::vector<Point3D>& GetVertices() const \
-        {return this->pointcloud;};
+    const std::vector<Point3D>& GetVertices() const
+    { return m_vertices; }
 
   private:
-    void insert_face(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
-    void insert_face(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
+    void insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
+    void insert_face(Point3D const* vert_array, std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 
@@ -223,23 +223,23 @@ class ConvexHull
 
     void CleanUp();
 
-    std::vector<Point3D> pointcloud = {};
-    std::list<Face> faces = {};
-
-    edge_map edges;
+    std::vector<Point3D> m_vertices;
+    std::list<face> m_faces;
+    edge_map m_edges;
 };
 
 template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
 {
   auto const n = points.size();
-  this->pointcloud.resize(n);
+  m_vertices.resize(n);
   for(size_t i = 0; i != n; i++)
   {
-    this->pointcloud[i].x = points[i].x;
-    this->pointcloud[i].y = points[i].y;
-    this->pointcloud[i].z = points[i].z;
+    m_vertices[i].x = points[i].x;
+    m_vertices[i].y = points[i].y;
+    m_vertices[i].z = points[i].z;
   }
-  this->ConstructHull(this->pointcloud);
+
+  this->ConstructHull(m_vertices);
 }
 
 #endif

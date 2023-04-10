@@ -30,27 +30,29 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <stdexcept>
 
-void ConvexHull::insert_face(vertex_index a, vertex_index b, vertex_index c, const Point3D& ref)
+void ConvexHull::insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, const Point3D& ref)
 {
-  faces.emplace_back(make_oriented_face(std::data(std::as_const(*this).pointcloud), a, b, c, ref));
-  auto& new_face = this->faces.back();
+  m_faces.emplace_back(make_oriented_face(vert_array, a, b, c, ref));
+  auto& new_face = m_faces.back();
 
-  create_and_link_edge(edges, a, b, new_face);
-  create_and_link_edge(edges, a, c, new_face);
-  create_and_link_edge(edges, b, c, new_face);
+  create_and_link_edge(m_edges, a, b, new_face);
+  create_and_link_edge(m_edges, a, c, new_face);
+  create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::insert_face(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& ref)
+void ConvexHull::insert_face(Point3D const* vert_array, std::pair<Edge const, EdgeData>& current_edge,
+  vertex_index c,
+  const Point3D& ref)
 {
   auto const a = current_edge.first.endpoints[0];
   auto const b = current_edge.first.endpoints[1];
 
-  faces.emplace_back(make_oriented_face(std::data(std::as_const(*this).pointcloud), a, b, c, ref));
-  auto& new_face = this->faces.back();
+  m_faces.emplace_back(make_oriented_face(vert_array, a, b, c, ref));
+  auto& new_face = m_faces.back();
 
   current_edge.second.link_face(&new_face);
-  create_and_link_edge(edges, a, c, new_face);
-  create_and_link_edge(edges, b, c, new_face);
+  create_and_link_edge(m_edges, a, c, new_face);
+  create_and_link_edge(m_edges, b, c, new_face);
 }
 
 void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
@@ -66,10 +68,12 @@ void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
     { throw std::runtime_error{"All points are colinear"}; }
   }
 
-  Face const face{vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}};
+  face const face{vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}};
+
+  auto const vert_array = std::data(pointcloud);
 
   auto j = i;
-  while(!VolumeSign(std::data(std::as_const(*this).pointcloud), face, pointcloud[j]))
+  while(!VolumeSign(vert_array, face, pointcloud[j]))
   {
     if(j++ == n-1)
     { throw std::runtime_error{"All pointcloud are coplanar"}; }
@@ -78,13 +82,13 @@ void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
   auto& p1 = pointcloud[i];    auto& p2 = pointcloud[i - 1];
   auto& p3 = pointcloud[i - 2];  auto& p4 = pointcloud[j];
   p1.processed = p2.processed = p3.processed = p4.processed = true;
-  this->insert_face(vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
-  this->insert_face(vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
-  this->insert_face(vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
-  this->insert_face(vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
+  this->insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
+  this->insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
+  this->insert_face(vert_array, vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
+  this->insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-size_t mark_visible_faces(std::list<Face>& faces, std::span<Point3D const> points, Point3D const& ref)
+size_t mark_visible_faces(std::list<face>& faces, std::span<Point3D const> points, Point3D const& ref)
 {
   size_t ret = 0;
 
@@ -102,12 +106,13 @@ size_t mark_visible_faces(std::list<Face>& faces, std::span<Point3D const> point
 
 void ConvexHull::IncreHull(const Point3D& pt)
 {
-  if(mark_visible_faces(faces, pointcloud, pt) == 0)
+  if(mark_visible_faces(m_faces, m_vertices, pt) == 0)
   { return; }
 
+  auto const vert_array = std::data(m_vertices);
 
   // Find the edges to make new tangent surface or to be removed
-  for(auto it = this->edges.begin(); it != this->edges.end(); it++)
+  for(auto it = m_edges.begin(); it != m_edges.end(); ++it)
   {
     auto& edge = *it;
     auto& face1 = edge.second.adjface1;
@@ -129,9 +134,11 @@ void ConvexHull::IncreHull(const Point3D& pt)
       { std::swap(face1, face2); }
       auto const inner_pt = FindInnerPoint(*face2, edge.first);
       edge.second.Erase(face2);
-      this->insert_face(edge,
-        vertex_index{&pt, std::data(std::as_const(*this).pointcloud)},
-        *(std::data(std::as_const(*this).pointcloud) + inner_pt));
+      this->insert_face(
+        vert_array,
+        edge,
+        vertex_index{&pt, vert_array},
+        *(vert_array + inner_pt));
     }
   }
 }
@@ -150,21 +157,21 @@ void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
 
 void ConvexHull::CleanUp()
 {
-  auto it_edge = this->edges.begin();
-  while(it_edge != this->edges.end())
+  auto it_edge = m_edges.begin();
+  while(it_edge != m_edges.end())
   {
     if(it_edge->second.to_be_removed)
-    { it_edge = this->edges.erase(it_edge); }
+    { it_edge = m_edges.erase(it_edge); }
     else
     { ++it_edge; }
   }
 
-  auto it_face = this->faces.begin();
-  while(it_face != this->faces.end())
+  auto it_face = m_faces.begin();
+  while(it_face != m_faces.end())
   {
     if(it_face->visible)
     {
-      it_face = this->faces.erase(it_face);
+      it_face = m_faces.erase(it_face);
     }
     else
     {

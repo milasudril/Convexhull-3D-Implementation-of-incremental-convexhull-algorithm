@@ -128,33 +128,13 @@ std::vector<Point3D> load_points(FILE* stream)
 
 int main()
 {
-  ConvexHull C(load_points(stdin));
+  ConvexHull C{load_points(stdin)};
 
-/*
-  std::unordered_map<Point3D, uint32_t, PointHash> vertex_index;
-  std::vector<Point3D> sorted_verts;
-  std::vector<face_indirect> faces;
-  for(auto const& face : C.GetFaces())
-  {
-    face_indirect f{};
-    for(size_t k = 0; k != std::size(f.vertices); ++k)
-    {
-      auto const vi = static_cast<uint32_t>(std::size(vertex_index));
-      auto i = vertex_index.insert(std::pair{face.vertices[k], vi});
-      if(i.second)
-      { sorted_verts.push_back(face.vertices[k]); }
-      f.vertices[k] = i.first->second;
-    }
-    faces.push_back(f);
-  }
-
-  assert(std::size(vertex_index) == std::size(sorted_verts));
-*/
   std::ranges::for_each(C.GetVertices(), [](auto const& item){
     printf("v %.8g %.8g %.8g\n", item.x, item.y, item.z);
   });
 
-  std::ranges::for_each(C.GetFaces(), [](auto const& item) {
+  std::ranges::for_each(C.faces(), [](auto const& item) {
     printf("f %u %u %u\n", item.vertices[0].value() + 1, item.vertices[1].value() + 1, item.vertices[2].value() + 1);
   });
 
