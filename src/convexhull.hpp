@@ -212,10 +212,10 @@ namespace convhull
 
   void remove_hidden(std::list<face>& faces);
 
-  class ConvexHull
+  class builder
   {
     public:
-      explicit ConvexHull(std::span<point_3d const> points):
+      explicit builder(std::span<point_3d const> points):
         m_visited(std::size(points), 0)
       { create(points); }
 

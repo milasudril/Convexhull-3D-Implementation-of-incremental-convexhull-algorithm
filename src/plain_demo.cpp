@@ -125,13 +125,13 @@ int main()
 {
   auto const points = load_points(stdin);
 
-  convhull::ConvexHull C{points};
+  convhull::builder builder{points};
 
   std::ranges::for_each(points, [](auto const& item){
     printf("v %.8g %.8g %.8g\n", item.x, item.y, item.z);
   });
 
-  std::ranges::for_each(C.faces(), [](auto const& item) {
+  std::ranges::for_each(builder.faces(), [](auto const& item) {
     printf("f %u %u %u\n", item.vertices[0].value() + 1, item.vertices[1].value() + 1, item.vertices[2].value() + 1);
   });
 

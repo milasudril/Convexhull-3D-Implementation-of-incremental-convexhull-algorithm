@@ -30,7 +30,7 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <stdexcept>
 
-void convhull::ConvexHull::insert_face(point_3d const* vert_array, vertex_index a, vertex_index b, vertex_index c, point_3d ref)
+void convhull::builder::insert_face(point_3d const* vert_array, vertex_index a, vertex_index b, vertex_index c, point_3d ref)
 {
   m_faces.emplace_back(make_oriented_face(vert_array, a, b, c, ref));
   auto& new_face = m_faces.back();
@@ -40,7 +40,7 @@ void convhull::ConvexHull::insert_face(point_3d const* vert_array, vertex_index 
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void convhull::ConvexHull::insert_face(point_3d const* vert_array,
+void convhull::builder::insert_face(point_3d const* vert_array,
   std::pair<edge const, edge_data>& current_edge,
   vertex_index c,
   point_3d ref)
@@ -56,7 +56,7 @@ void convhull::ConvexHull::insert_face(point_3d const* vert_array,
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void convhull::ConvexHull::create_seed(std::span<point_3d const> points)
+void convhull::builder::create_seed(std::span<point_3d const> points)
 {
   auto const n = points.size();
   if(n <= 3)
@@ -112,7 +112,7 @@ size_t convhull::mark_visible_faces(std::list<face>& faces, point_3d const* poin
   return ret;
 }
 
-void convhull::ConvexHull::try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> pt)
+void convhull::builder::try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> pt)
 {
   if(mark_visible_faces(m_faces, vert_array, pt) == 0)
   { return; }
@@ -168,7 +168,7 @@ void convhull::remove_hidden(std::list<face>& faces)
   }
 }
 
-void convhull::ConvexHull::create(std::span<point_3d const> points)
+void convhull::builder::create(std::span<point_3d const> points)
 {
   create_seed(points);
 
