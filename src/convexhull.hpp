@@ -38,6 +38,8 @@ the book Computational Geometry in C by O'Rourke */
 #include <unordered_set>
 #include <list>
 #include <span>
+#include <bit>
+#include <cassert>
 
 class vertex_index
 {
@@ -57,33 +59,48 @@ private:
   uint32_t m_value;
 };
 
-// Defined in CCW
+constexpr auto operator+(Point3D* ptr, vertex_index vi)
+{
+  return ptr + vi.value();
+}
+
+constexpr auto operator+(Point3D const* ptr, vertex_index vi)
+{
+  return ptr + vi.value();
+}
+
+
 struct Face
 {
-  Face(const Point3D& p1, const Point3D& p2, const Point3D& p3): visible(false)
-      { vertices[0] = p1; vertices[1] = p2; vertices[2] = p3;};
+  std::array<vertex_index, 3> vertices;
+  bool visible{false};
 
-  void Reverse(){std::swap(vertices[0], vertices[2]); };
-
-  bool visible;
-  Point3D vertices[3];
+  void flip()
+  { std::swap(vertices[0], vertices[2]); }
 };
 
 // A point is considered outside of a CCW face if the volume of tetrahedron
 // formed by the face and point is negative. Note that origin is set at p.
-inline auto VolumeSign(Face const& f, Point3D const& p)
+inline auto VolumeSign(Point3D const* vert_array, Face const& f, Point3D const& p)
 {
   double vol;
   double ax, ay, az, bx, by, bz, cx, cy, cz;
-  ax = f.vertices[0].x - p.x;
-  ay = f.vertices[0].y - p.y;
-  az = f.vertices[0].z - p.z;
-  bx = f.vertices[1].x - p.x;
-  by = f.vertices[1].y - p.y;
-  bz = f.vertices[1].z - p.z;
-  cx = f.vertices[2].x - p.x;
-  cy = f.vertices[2].y - p.y;
-  cz = f.vertices[2].z - p.z;
+
+  std::array<Point3D, 3> const vertices{
+    *(vert_array + f.vertices[0]),
+    *(vert_array + f.vertices[1]),
+    *(vert_array + f.vertices[2])
+  };
+
+  ax = vertices[0].x - p.x;
+  ay = vertices[0].y - p.y;
+  az = vertices[0].z - p.z;
+  bx = vertices[1].x - p.x;
+  by = vertices[1].y - p.y;
+  bz = vertices[1].z - p.z;
+  cx = vertices[2].x - p.x;
+  cy = vertices[2].y - p.y;
+  cz = vertices[2].z - p.z;
   vol = ax * (by * cz - bz * cy) +\
         ay * (bz * cx - bx * cz) +\
         az * (bx * cy - by * cx);
@@ -93,24 +110,22 @@ inline auto VolumeSign(Face const& f, Point3D const& p)
 
 struct Edge
 {
-  Edge(const Point3D& p1, const Point3D& p2):
-      adjface1(nullptr), adjface2(nullptr), remove(false)
-      { endpoints[0] = p1; endpoints[1] = p2; };
+  explicit Edge(vertex_index p1, vertex_index p2):
+    adjface1{nullptr},
+    adjface2{nullptr},
+    endpoints{p1, p2},
+    remove{false}
+  {}
 
   void LinkAdjFace(Face* face)
   {
-    if( adjface1 != NULL && adjface2 != NULL )
-    {
-      std::cout<<"warning: property violated!\n";
-      abort();
-    }
+    assert(adjface1 == nullptr || adjface2 == nullptr);
 
     if(adjface1 == nullptr)
     { adjface1 = face; }
     else
     { adjface2 = face; }
-
-  };
+  }
 
   void Erase(Face* face)
   {
@@ -120,15 +135,15 @@ struct Edge
 
   Face* adjface1;
   Face* adjface2;
+  std::array<vertex_index, 2> endpoints;
   bool remove;
-  Point3D endpoints[2];
 };
 
 
 // for face(a,b,c) and edge(a,c), return b
-inline Point3D FindInnerPoint(const Face& f, const Edge& e)
+inline auto FindInnerPoint(const Face& f, const Edge& e)
 {
-  for(int i = 0; i < 3; i++)
+  for(size_t i = 0; i != std::size(f.vertices); i++)
   {
     if(f.vertices[i] == e.endpoints[0]) continue;
     if(f.vertices[i] == e.endpoints[1]) continue;
@@ -152,7 +167,7 @@ class ConvexHull
     const std::list<Face>& GetFaces() const {return this->faces;};
 
     const std::vector<Point3D>& GetVertices() const \
-        {return this->exterior_points;};
+        {return this->pointcloud;};
     // Return exterior vertices than defines the convell hull
 
     size_t Size() const {return this->exterior_points.size();};
@@ -162,8 +177,7 @@ class ConvexHull
     size_t Key2Edge(const Point3D& a, const Point3D& b) const;
     // Hash key for edge. hash(a, b) = hash(b, a)
 
-    void AddOneFace(const Point3D& a, const Point3D& b,
-        const Point3D& c, const Point3D& inner_pt);
+    void AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 
@@ -185,8 +199,8 @@ class ConvexHull
 
     struct EdgeEndpoints
     {
-      Point3D p1;
-      Point3D p2;
+      vertex_index p1;
+      vertex_index p2;
 
       constexpr bool operator==(const EdgeEndpoints&) const = default;
       constexpr bool operator!=(const EdgeEndpoints&) const = default;
@@ -196,7 +210,7 @@ class ConvexHull
     {
       size_t operator()(EdgeEndpoints const& a) const
       {
-        return PointHash{}(a.p1) ^ PointHash{}(a.p2);
+        return std::hash<size_t>{}(std::bit_cast<size_t>(a));
       }
     };
 
@@ -215,7 +229,7 @@ template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
   }
   this->ConstructHull(this->pointcloud);
 }
-
+#if 0
 template<typename T> bool ConvexHull::Contains(T p) const
 {
   Point3D pt(p.x, p.y, p.z);
@@ -225,4 +239,5 @@ template<typename T> bool ConvexHull::Contains(T p) const
   }
   return true;
 }
+#endif
 #endif

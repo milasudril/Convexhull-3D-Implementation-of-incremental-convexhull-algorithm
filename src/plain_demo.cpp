@@ -130,6 +130,7 @@ int main()
 {
   ConvexHull C(load_points(stdin));
 
+/*
   std::unordered_map<Point3D, uint32_t, PointHash> vertex_index;
   std::vector<Point3D> sorted_verts;
   std::vector<face_indirect> faces;
@@ -148,13 +149,13 @@ int main()
   }
 
   assert(std::size(vertex_index) == std::size(sorted_verts));
-
-  std::ranges::for_each(sorted_verts, [](auto const& item){
+*/
+  std::ranges::for_each(C.GetVertices(), [](auto const& item){
     printf("v %.8g %.8g %.8g\n", item.x, item.y, item.z);
   });
 
-  std::ranges::for_each(faces, [](auto const& item) {
-    printf("f %u %u %u\n", item.vertices[0] + 1, item.vertices[1] + 1, item.vertices[2] + 1);
+  std::ranges::for_each(C.GetFaces(), [](auto const& item) {
+    printf("f %u %u %u\n", item.vertices[0].value() + 1, item.vertices[1].value() + 1, item.vertices[2].value() + 1);
   });
 
   return 0;

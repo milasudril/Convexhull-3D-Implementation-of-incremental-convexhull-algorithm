@@ -28,16 +28,18 @@ the book Computational Geometry in C by O'Rourke */
 
 #include "./convexhull.hpp"
 
-void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b,
-    const Point3D& c, const Point3D& inner_pt)
+void ConvexHull::AddOneFace(vertex_index a, vertex_index b,
+    vertex_index c, const Point3D& inner_pt)
 {
   // Make sure face is CCW with face normal pointing outward
-  this->faces.emplace_back(a, b, c);
+  this->faces.emplace_back(Face{a, b, c});
   auto& new_face = this->faces.back();
-  if(VolumeSign(this->faces.back(), inner_pt) < 0) new_face.Reverse();
+  if(VolumeSign(std::data(std::as_const(*this).pointcloud),
+    std::as_const(new_face), inner_pt) < 0)
+  { new_face.flip(); }
 
   // Create edges and link them to face pointer
-  auto create_edge = [&](const Point3D& p1, const Point3D& p2)
+  auto create_edge = [&](vertex_index p1, vertex_index p2)
   {
     auto const key = EdgeEndpoints{p1, p2};
     if(!this->map_edges.count(key))
@@ -61,7 +63,7 @@ bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
     return false;
   }
 
-  size_t i = 2;
+  uint32_t i = 2;
   while(Colinear(pointcloud[i], pointcloud[i - 1], pointcloud[i - 2]))
   {
     if(i++ == n - 1)
@@ -71,10 +73,10 @@ bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
     }
   }
 
-  Face face(pointcloud[i], pointcloud[i-1], pointcloud[i-2]);
+  Face face{vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}};
 
   auto j = i;
-  while(!VolumeSign(face, pointcloud[j]))
+  while(!VolumeSign(std::data(std::as_const(*this).pointcloud), face, pointcloud[j]))
   {
     if(j++ == n-1)
     {
@@ -83,13 +85,13 @@ bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
     }
   }
 
-  auto& p1 = pointcloud[i];    auto& p2 = pointcloud[i-1];
-  auto& p3 = pointcloud[i-2];  auto& p4 = pointcloud[j];
+  auto& p1 = pointcloud[i];    auto& p2 = pointcloud[i - 1];
+  auto& p3 = pointcloud[i - 2];  auto& p4 = pointcloud[j];
   p1.processed = p2.processed = p3.processed = p4.processed = true;
-  this->AddOneFace(p1, p2, p3, p4);
-  this->AddOneFace(p1, p2, p4, p3);
-  this->AddOneFace(p1, p3, p4, p2);
-  this->AddOneFace(p2, p3, p4, p1);
+  this->AddOneFace(vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
+  this->AddOneFace(vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
+  this->AddOneFace(vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
+  this->AddOneFace(vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
   return true;
 
 }
@@ -100,7 +102,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
   bool vis = false;
   for(auto& face : this->faces)
   {
-    if(VolumeSign(face, pt) < 0)
+    if(VolumeSign(std::data(std::as_const(*this).pointcloud), face, pt) < 0)
     {
       vis = true;
       face.visible = true;
@@ -134,7 +136,10 @@ void ConvexHull::IncreHull(const Point3D& pt)
       if(face1->visible) std::swap(face1, face2);
       auto inner_pt = FindInnerPoint(*face2, edge);
       edge.Erase(face2);
-      this->AddOneFace(edge.endpoints[0], edge.endpoints[1], pt, inner_pt);
+      this->AddOneFace(edge.endpoints[0],
+        edge.endpoints[1],
+        vertex_index{&pt, std::data(std::as_const(*this).pointcloud)},
+        *(std::data(std::as_const(*this).pointcloud) + inner_pt));
     }
   }
 }
@@ -177,6 +182,7 @@ void ConvexHull::CleanUp()
 
 void ConvexHull::ExtractExteriorPoints()
 {
+  /*
   std::unordered_set<Point3D, PointHash> exterior_set;
   for(const auto& f : this->faces)
   {
@@ -185,4 +191,5 @@ void ConvexHull::ExtractExteriorPoints()
   }
   this->exterior_points = \
       std::vector<Point3D>(exterior_set.begin(), exterior_set.end());
+      */
 }
