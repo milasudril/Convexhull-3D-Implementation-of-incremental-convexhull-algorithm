@@ -28,33 +28,13 @@ the book Computational Geometry in C by O'Rourke */
 
 #include "./convexhull.hpp"
 
-int ConvexHull::VolumeSign(const Face& f, const Point3D& p) const
-{
-  double vol;
-  double ax, ay, az, bx, by, bz, cx, cy, cz;
-  ax = f.vertices[0].x - p.x;
-  ay = f.vertices[0].y - p.y;
-  az = f.vertices[0].z - p.z;
-  bx = f.vertices[1].x - p.x;
-  by = f.vertices[1].y - p.y;
-  bz = f.vertices[1].z - p.z;
-  cx = f.vertices[2].x - p.x;
-  cy = f.vertices[2].y - p.y;
-  cz = f.vertices[2].z - p.z;
-  vol = ax * (by * cz - bz * cy) +\
-        ay * (bz * cx - bx * cz) +\
-        az * (bx * cy - by * cx);
-  if(vol == 0) return 0;
-  return vol < 0 ? -1 : 1;
-}
-
 void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b,
     const Point3D& c, const Point3D& inner_pt)
 {
   // Make sure face is CCW with face normal pointing outward
   this->faces.emplace_back(a, b, c);
   auto& new_face = this->faces.back();
-  if(this->VolumeSign(this->faces.back(), inner_pt) < 0) new_face.Reverse();
+  if(VolumeSign(this->faces.back(), inner_pt) < 0) new_face.Reverse();
 
   // Create edges and link them to face pointer
   auto create_edge = [&](const Point3D& p1, const Point3D& p2)
@@ -94,7 +74,7 @@ bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
   Face face(pointcloud[i], pointcloud[i-1], pointcloud[i-2]);
 
   auto j = i;
-  while(!this->VolumeSign(face, pointcloud[j]))
+  while(!VolumeSign(face, pointcloud[j]))
   {
     if(j++ == n-1)
     {

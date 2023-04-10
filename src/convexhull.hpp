@@ -51,6 +51,29 @@ struct Face
   Point3D vertices[3];
 };
 
+// A point is considered outside of a CCW face if the volume of tetrahedron
+// formed by the face and point is negative. Note that origin is set at p.
+inline auto VolumeSign(Face const& f, Point3D const& p)
+{
+  double vol;
+  double ax, ay, az, bx, by, bz, cx, cy, cz;
+  ax = f.vertices[0].x - p.x;
+  ay = f.vertices[0].y - p.y;
+  az = f.vertices[0].z - p.z;
+  bx = f.vertices[1].x - p.x;
+  by = f.vertices[1].y - p.y;
+  bz = f.vertices[1].z - p.z;
+  cx = f.vertices[2].x - p.x;
+  cy = f.vertices[2].y - p.y;
+  cz = f.vertices[2].z - p.z;
+  vol = ax * (by * cz - bz * cy) +\
+        ay * (bz * cx - bx * cz) +\
+        az * (bx * cy - by * cx);
+  if(vol == 0) return 0;
+  return vol < 0 ? -1 : 1;
+}
+
+
 struct Edge
 {
   Edge(const Point3D& p1, const Point3D& p2):
@@ -104,11 +127,6 @@ class ConvexHull
     size_t Size() const {return this->exterior_points.size();};
 
   private:
-    bool CoPlanar(Face& f, Point3D& p);
-
-    int VolumeSign(const Face& f, const Point3D& p) const;
-    // A point is considered outside of a CCW face if the volume of tetrahedron
-    // formed by the face and point is negative. Note that origin is set at p.
 
     size_t Key2Edge(const Point3D& a, const Point3D& b) const;
     // Hash key for edge. hash(a, b) = hash(b, a)
