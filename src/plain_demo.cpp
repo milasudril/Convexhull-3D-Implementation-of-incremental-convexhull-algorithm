@@ -7,11 +7,6 @@
 #include <algorithm>
 #include <optional>
 
-struct face_indirect
-{
-  std::array<uint32_t, 3> vertices;
-};
-
 std::vector<point_3d> load_points(FILE* stream)
 {
   std::vector<point_3d> ret;
