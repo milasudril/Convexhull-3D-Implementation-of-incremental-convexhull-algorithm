@@ -34,7 +34,7 @@ the book Computational Geometry in C by O'Rourke */
 #include <vector>
 #include <string>
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <unordered_set>
 #include <list>
 #include <span>
@@ -178,7 +178,7 @@ class ConvexHull
 
   private:
     void AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
-    void AddOneFace(std::pair<Edge, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
+    void AddOneFace(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 
@@ -193,17 +193,18 @@ class ConvexHull
 
     std::vector<Point3D> pointcloud = {};
     std::list<Face> faces = {};
-    std::list<std::pair<Edge, EdgeData>> edges = {};
 
-    struct EdgeEndpointHash
+    struct EdgeCmp
     {
-      size_t operator()(Edge const& a) const
+      size_t operator()(Edge const& a, Edge const& b) const
       {
-        return std::hash<size_t>{}(std::bit_cast<size_t>(a));
+        auto const a_bits = std::bit_cast<size_t>(a);
+        auto const b_bits = std::bit_cast<size_t>(b);
+        return a_bits < b_bits;
       }
     };
 
-    std::unordered_map<Edge, EdgeData*, EdgeEndpointHash> map_edges;
+    std::map<Edge, EdgeData, EdgeCmp> edges;
 };
 
 template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)

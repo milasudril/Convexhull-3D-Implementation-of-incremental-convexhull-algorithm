@@ -40,20 +40,15 @@ void ConvexHull::AddOneFace(vertex_index a, vertex_index b, vertex_index c, cons
   // Create edges and link them to face pointer
   auto create_edge = [&](vertex_index p1, vertex_index p2)
   {
-    auto const key = Edge{p1, p2};
-    if(!this->map_edges.count(key))
-    {
-      this->edges.emplace_back(std::pair{key, EdgeData{}});
-      this->map_edges.insert({key, &this->edges.back().second});
-    }
-    this->map_edges[key]->LinkAdjFace(&new_face);
+    auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
+    i.first->second.LinkAdjFace(&new_face);
   };
   create_edge(a, b);
   create_edge(a, c);
   create_edge(b, c);
 }
 
-void ConvexHull::AddOneFace(std::pair<Edge, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt)
+void ConvexHull::AddOneFace(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt)
 {
   auto const a = current_edge.first.endpoints[0];
   auto const b = current_edge.first.endpoints[1];
@@ -68,13 +63,8 @@ void ConvexHull::AddOneFace(std::pair<Edge, EdgeData>& current_edge, vertex_inde
   // Create edges and link them to face pointer
   auto create_edge = [&](vertex_index p1, vertex_index p2)
   {
-    auto const key = Edge{p1, p2};
-    if(!this->map_edges.count(key))
-    {
-      this->edges.emplace_back(std::pair{key, EdgeData{}});
-      this->map_edges.insert({key, &this->edges.back().second});
-    }
-    this->map_edges[key]->LinkAdjFace(&new_face);
+    auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
+    i.first->second.LinkAdjFace(&new_face);
   };
 
   current_edge.second.LinkAdjFace(&new_face);
@@ -189,15 +179,22 @@ void ConvexHull::CleanUp()
   {
     if(it_edge->second.remove)
     {
-      this->map_edges.erase(it_edge->first);
-      this->edges.erase(it_edge++);
+      it_edge = this->edges.erase(it_edge);
     }
-    else it_edge++;
-  };
+    else
+    { ++it_edge; }
+  }
+
   auto it_face = this->faces.begin();
   while(it_face != this->faces.end())
   {
-    if(it_face->visible) this->faces.erase(it_face++);
-    else it_face++;
+    if(it_face->visible)
+    {
+      it_face = this->faces.erase(it_face);
+    }
+    else
+    {
+      ++it_face;
+    }
   }
 }
