@@ -96,7 +96,7 @@ void ConvexHull::create_seed(std::span<Point3D const> points)
   insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D const& ref)
+size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D ref)
 {
   size_t ret = 0;
 
