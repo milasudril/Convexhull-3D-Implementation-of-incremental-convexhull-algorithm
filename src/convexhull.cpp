@@ -84,10 +84,10 @@ void ConvexHull::create_seed(std::span<Point3D> pointcloud)
   auto& p3 = pointcloud[i - 2];
   auto& p4 = pointcloud[j];
 
-  p1.processed = true;
-  p2.processed = true;
-  p3.processed = true;
-  p4.processed = true;
+  m_visited[i] = 1;
+  m_visited[i - 1] = 1;
+  m_visited[i - 2] = 1;
+  m_visited[j] = 1;
 
   insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
   insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
@@ -171,9 +171,9 @@ void ConvexHull::create(std::span<Point3D> pointcloud)
 {
   create_seed(pointcloud);
 
-  for(const auto& pt : pointcloud)
+  for(auto const& pt : pointcloud)
   {
-    if(pt.processed)
+    if(m_visited[vertex_index{&pt, std::data(pointcloud)}.value()])
     { continue; }
 
     try_insert(std::data(pointcloud), pt);

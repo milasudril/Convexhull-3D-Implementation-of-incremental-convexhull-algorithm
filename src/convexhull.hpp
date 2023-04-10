@@ -216,11 +216,13 @@ class ConvexHull
     void create(std::span<Point3D> pointcloud);
 
     std::vector<Point3D> m_vertices;
+    std::vector<int8_t> m_visited;
     std::list<face> m_faces;
     edge_map m_edges;
 };
 
-template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
+template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points):
+  m_visited(std::size(points))
 {
   auto const n = points.size();
   m_vertices.resize(n);

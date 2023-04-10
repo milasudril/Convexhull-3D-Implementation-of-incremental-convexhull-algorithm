@@ -5,12 +5,10 @@ struct Point3D {
   float y;
   float z;
   float intensity;
-  bool processed;
+
   Point3D() = default;
-  Point3D(float _x, float _y, float _z):\
-      x(_x), y(_y), z(_z), intensity(0), processed(false) {}
-  Point3D(float _x, float _y, float _z, float _i):\
-      x(_x), y(_y), z(_z), intensity(_i), processed(false) {}
+  Point3D(float _x, float _y, float _z):
+      x(_x), y(_y), z(_z), intensity(0.0f) {}
 
   constexpr bool operator ==(const Point3D& pt) const
   {
