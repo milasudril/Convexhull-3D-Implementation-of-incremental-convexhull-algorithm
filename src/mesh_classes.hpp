@@ -1,6 +1,8 @@
 #ifndef CONVHULL_MESHCLASSES_HPP
 #define CONVHULL_MESHCLASSES_HPP
 
+#include "./point.hpp"
+
 #include <cstdint>
 #include <array>
 #include <cassert>
