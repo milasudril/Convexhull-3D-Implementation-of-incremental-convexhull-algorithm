@@ -82,7 +82,7 @@ bool ConvexHull::Colinear(const Point3D& a, const Point3D& b, const Point3D& c) 
           (b.y - a.y) * (c.x - a.x)) == 0;
 }
 
-bool ConvexHull::BuildFirstHull(std::vector<Point3D>& pointcloud)
+bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
 {
   auto const n = pointcloud.size();
   if(n <= 3)
@@ -181,7 +181,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
   }
 }
 
-void ConvexHull::ConstructHull(std::vector<Point3D>& pointcloud)
+void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
 {
   if(!this->BuildFirstHull(pointcloud)) return;
   for(const auto& pt : pointcloud)

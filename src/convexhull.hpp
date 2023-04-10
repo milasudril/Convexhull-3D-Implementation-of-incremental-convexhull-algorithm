@@ -37,6 +37,7 @@ the book Computational Geometry in C by O'Rourke */
 #include <unordered_map>
 #include <unordered_set>
 #include <list>
+#include <span>
 
 // Defined in CCW
 struct Face
@@ -120,12 +121,12 @@ class ConvexHull
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 
-    bool BuildFirstHull(std::vector<Point3D>& pointcloud);
+    bool BuildFirstHull(std::span<Point3D> pointcloud);
     // Build a tetrahedron as first convex hull
 
     void IncreHull(const Point3D& p);
 
-    void ConstructHull(std::vector<Point3D>& pointcloud);
+    void ConstructHull(std::span<Point3D> pointcloud);
 
     void CleanUp();
 
