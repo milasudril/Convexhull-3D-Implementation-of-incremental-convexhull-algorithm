@@ -94,18 +94,6 @@ bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
 
 }
 
-Point3D ConvexHull::FindInnerPoint(const Face* f, const Edge& e)
-{
-  for(int i = 0; i < 3; i++)
-  {
-    if(f->vertices[i] == e.endpoints[0]) continue;
-    if(f->vertices[i] == e.endpoints[1]) continue;
-    return f->vertices[i];
-  }
-
-  abort();
-}
-
 void ConvexHull::IncreHull(const Point3D& pt)
 {
   // Find the illuminated faces (which will be removed later)
@@ -144,7 +132,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
     else if(face1->visible|| face2->visible)
     {
       if(face1->visible) std::swap(face1, face2);
-      auto inner_pt = this->FindInnerPoint(face2, edge);
+      auto inner_pt = FindInnerPoint(*face2, edge);
       edge.Erase(face2);
       this->AddOneFace(edge.endpoints[0], edge.endpoints[1], pt, inner_pt);
     }

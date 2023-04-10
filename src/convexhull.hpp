@@ -73,7 +73,6 @@ inline auto VolumeSign(Face const& f, Point3D const& p)
   return vol < 0 ? -1 : 1;
 }
 
-
 struct Edge
 {
   Edge(const Point3D& p1, const Point3D& p2):
@@ -106,6 +105,20 @@ struct Edge
   bool remove;
   Point3D endpoints[2];
 };
+
+
+// for face(a,b,c) and edge(a,c), return b
+inline Point3D FindInnerPoint(const Face& f, const Edge& e)
+{
+  for(int i = 0; i < 3; i++)
+  {
+    if(f.vertices[i] == e.endpoints[0]) continue;
+    if(f.vertices[i] == e.endpoints[1]) continue;
+    return f.vertices[i];
+  }
+
+  abort();
+}
 
 class ConvexHull
 {
@@ -146,9 +159,6 @@ class ConvexHull
     void CleanUp();
 
     void ExtractExteriorPoints();
-
-    Point3D FindInnerPoint(const Face* f, const Edge& e);
-    // for face(a,b,c) and edge(a,c), return b
 
     std::vector<Point3D> pointcloud = {};
     std::vector<Point3D> exterior_points = {};
