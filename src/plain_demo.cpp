@@ -1,11 +1,10 @@
 //@ {"target":{"name":"plain_demo.o"}}
 
-#include "./convexhull.hpp"
+#include "./builder.hpp"
+
 #include <vector>
-#include <array>
 #include <cassert>
 #include <algorithm>
-#include <optional>
 
 std::vector<convhull::point_3d> load_points(FILE* stream)
 {

@@ -24,10 +24,10 @@ THE SOFTWARE. */
 /* This work is an implementation of incremental convex hull algorithm from
 the book Computational Geometry in C by O'Rourke */
 
-//@ {"dependencies_extra":[{"ref":"./convexhull.o", "rel":"implementation"}]}
+//@ {"dependencies_extra":[{"ref":"./builder.o", "rel":"implementation"}]}
 
-#ifndef CONVEXHULL_HPP
-#define CONVEXHULL_HPP
+#ifndef CONVHULL_BUILDER_HPP
+#define CONVHULL_BUILDER_HPP
 
 #include "./point.hpp"
 #include "./mesh_classes.hpp"
