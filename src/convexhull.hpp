@@ -213,8 +213,7 @@ class ConvexHull
 
     void create_seed(std::span<Point3D> pointcloud);
     void try_insert(Point3D const* vert_array, const Point3D& p);
-
-    void ConstructHull(std::span<Point3D> pointcloud);
+    void create(std::span<Point3D> pointcloud);
 
     std::vector<Point3D> m_vertices;
     std::list<face> m_faces;
@@ -232,7 +231,7 @@ template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
     m_vertices[i].z = points[i].z;
   }
 
-  ConstructHull(m_vertices);
+  create(m_vertices);
 }
 
 #endif

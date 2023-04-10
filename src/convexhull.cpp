@@ -172,7 +172,7 @@ void remove_hidden(std::list<face>& faces)
   }
 }
 
-void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
+void ConvexHull::create(std::span<Point3D> pointcloud)
 {
   create_seed(pointcloud);
 
