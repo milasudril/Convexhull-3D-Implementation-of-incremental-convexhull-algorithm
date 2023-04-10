@@ -96,7 +96,7 @@ void convhull::builder::create_seed(std::span<point_3d const> points)
   insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-size_t convhull::mark_visible_faces(std::list<face>& faces, point_3d const* points, point_3d cam_loc)
+size_t convhull::mark_visible_faces(face_list& faces, point_3d const* points, point_3d cam_loc)
 {
   size_t ret = 0;
 
@@ -156,7 +156,7 @@ void convhull::cleanup(edge_map& edges)
   }
 }
 
-void convhull::remove_hidden(std::list<face>& faces)
+void convhull::remove_hidden(face_list& faces)
 {
   auto it_face = faces.begin();
   while(it_face != faces.end())
