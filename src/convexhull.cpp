@@ -76,7 +76,7 @@ void ConvexHull::create_seed(std::span<Point3D> pointcloud)
   while(!VolumeSign(vert_array, face, pointcloud[j]))
   {
     if(j++ == n-1)
-    { throw std::runtime_error{"All pointcloud are coplanar"}; }
+    { throw std::runtime_error{"All points are coplanar"}; }
   }
 
   auto& p1 = pointcloud[i];
