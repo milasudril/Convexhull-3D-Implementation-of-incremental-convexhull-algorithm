@@ -50,7 +50,7 @@ namespace convhull
 
 	// A point is considered outside of a CCW face if the volume of tetrahedron
 	// formed by the face and point is negative. Note that origin is set at p.
-	inline auto VolumeSign(point_3d const* vert_array, face const& f, point_3d p)
+	inline auto signed_volume(point_3d const* vert_array, face const& f, point_3d p)
 	{
 		std::array<point_3d, 3> const vertices{
 			*(vert_array + f.vertices[0]),
@@ -62,17 +62,7 @@ namespace convhull
 		auto const b = vertices[1] - p;
 		auto const c = vertices[2] - p;
 
-		auto const vol = inner_product(a, cross(b, c));
-#if 0
-		ax * (by * cz - bz * cy) +
-					ay * (bz * cx - bx * cz) +\
-					az * (bx * cy - by * cx);
-#endif
-
-		if(vol == 0)
-		{ return 0; }
-
-		return vol < 0 ? -1 : 1;
+		return inner_product(a, cross(b, c));
 	}
 
 	inline auto make_oriented_face(point_3d const* vert_array,
@@ -82,7 +72,7 @@ namespace convhull
 		point_3d ref)
 	{
 		face ret{a, b, c};
-		if(VolumeSign(vert_array, ret, ref) < 0)
+		if(signed_volume(vert_array, ret, ref) < 0.0f)
 		{ ret.flip(); }
 
 		return ret;

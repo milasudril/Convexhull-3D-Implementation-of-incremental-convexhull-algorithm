@@ -74,7 +74,7 @@ void convhull::builder::create_seed(std::span<point_3d const> points)
 	auto const vert_array = std::data(points);
 
 	auto j = i;
-	while(!VolumeSign(vert_array, face, points[j]))
+	while(signed_volume(vert_array, face, points[j]) == 0.0f)
 	{
 		if(j++ == n-1)
 		{ throw std::runtime_error{"All points are coplanar"}; }
@@ -102,7 +102,7 @@ size_t convhull::mark_visible_faces(face_list& faces, point_3d const* points, po
 
 	for(auto& face : faces)
 	{
-		if(VolumeSign(points, face, cam_loc) < 0)
+		if(signed_volume(points, face, cam_loc) < 0)
 		{
 			++ret;
 			face.visible = true;
