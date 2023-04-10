@@ -160,6 +160,23 @@ struct EdgeData
   bool to_be_removed;
 };
 
+struct edge_cmp
+{
+  size_t operator()(Edge const& a, Edge const& b) const
+  {
+    auto const a_bits = std::bit_cast<size_t>(a);
+    auto const b_bits = std::bit_cast<size_t>(b);
+    return a_bits < b_bits;
+  }
+};
+
+using edge_map = std::map<Edge, EdgeData, edge_cmp>;
+
+inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, Face& face)
+{
+  auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
+  i.first->second.LinkAdjFace(&face);
+}
 
 // for face(a,b,c) and edge(a,c), return b
 inline auto FindInnerPoint(const Face& f, const Edge& e)
@@ -205,17 +222,7 @@ class ConvexHull
     std::vector<Point3D> pointcloud = {};
     std::list<Face> faces = {};
 
-    struct EdgeCmp
-    {
-      size_t operator()(Edge const& a, Edge const& b) const
-      {
-        auto const a_bits = std::bit_cast<size_t>(a);
-        auto const b_bits = std::bit_cast<size_t>(b);
-        return a_bits < b_bits;
-      }
-    };
-
-    std::map<Edge, EdgeData, EdgeCmp> edges;
+    edge_map edges;
 };
 
 template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)

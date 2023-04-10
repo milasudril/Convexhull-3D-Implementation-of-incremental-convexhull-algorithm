@@ -35,15 +35,9 @@ void ConvexHull::insert_face(vertex_index a, vertex_index b, vertex_index c, con
   faces.emplace_back(make_oriented_face(std::data(std::as_const(*this).pointcloud), a, b, c, ref));
   auto& new_face = this->faces.back();
 
-  // Create edges and link them to face pointer
-  auto create_edge = [&](vertex_index p1, vertex_index p2)
-  {
-    auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
-    i.first->second.LinkAdjFace(&new_face);
-  };
-  create_edge(a, b);
-  create_edge(a, c);
-  create_edge(b, c);
+  create_and_link_edge(edges, a, b, new_face);
+  create_and_link_edge(edges, a, c, new_face);
+  create_and_link_edge(edges, b, c, new_face);
 }
 
 void ConvexHull::insert_face(std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& ref)
@@ -54,16 +48,9 @@ void ConvexHull::insert_face(std::pair<Edge const, EdgeData>& current_edge, vert
   faces.emplace_back(make_oriented_face(std::data(std::as_const(*this).pointcloud), a, b, c, ref));
   auto& new_face = this->faces.back();
 
-  // Create edges and link them to face pointer
-  auto create_edge = [&](vertex_index p1, vertex_index p2)
-  {
-    auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
-    i.first->second.LinkAdjFace(&new_face);
-  };
-
   current_edge.second.LinkAdjFace(&new_face);
-  create_edge(a, c);
-  create_edge(b, c);
+  create_and_link_edge(edges, a, c, new_face);
+  create_and_link_edge(edges, b, c, new_face);
 }
 
 void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
