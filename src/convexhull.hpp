@@ -104,9 +104,6 @@ class ConvexHull
     size_t Size() const {return this->exterior_points.size();};
 
   private:
-
-    bool Colinear(const Point3D& a, const Point3D& b, const Point3D& c) const;
-
     bool CoPlanar(Face& f, Point3D& p);
 
     int VolumeSign(const Face& f, const Point3D& p) const;

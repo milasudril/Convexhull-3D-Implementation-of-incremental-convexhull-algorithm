@@ -72,16 +72,6 @@ void ConvexHull::AddOneFace(const Point3D& a, const Point3D& b,
   create_edge(b, c);
 }
 
-bool ConvexHull::Colinear(const Point3D& a, const Point3D& b, const Point3D& c) const
-{
-  return ((c.z - a.z) * (b.y - a.y) -
-          (b.z - a.z) * (c.y - a.y)) == 0 &&\
-         ((b.z - a.z) * (c.x - a.x) -
-          (b.x - a.x) * (c.z - a.z)) == 0 &&\
-         ((b.x - a.x) * (c.y - a.y) -
-          (b.y - a.y) * (c.x - a.x)) == 0;
-}
-
 bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
 {
   auto const n = pointcloud.size();
@@ -92,7 +82,7 @@ bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
   }
 
   size_t i = 2;
-  while(this->Colinear(pointcloud[i], pointcloud[i - 1], pointcloud[i - 2]))
+  while(Colinear(pointcloud[i], pointcloud[i - 1], pointcloud[i - 2]))
   {
     if(i++ == n - 1)
     {

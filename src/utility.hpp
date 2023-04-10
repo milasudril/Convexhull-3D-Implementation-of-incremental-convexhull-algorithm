@@ -46,7 +46,16 @@ struct Point3D {
   }
 };
 
-using PointStack = std::vector<Point3D>;
+inline bool Colinear(const Point3D& a, const Point3D& b, const Point3D& c)
+{
+  return ((c.z - a.z) * (b.y - a.y) -
+          (b.z - a.z) * (c.y - a.y)) == 0 &&\
+         ((b.z - a.z) * (c.x - a.x) -
+          (b.x - a.x) * (c.z - a.z)) == 0 &&\
+         ((b.x - a.x) * (c.y - a.y) -
+          (b.y - a.y) * (c.x - a.x)) == 0;
+}
+
 
 struct PointHash
 {
