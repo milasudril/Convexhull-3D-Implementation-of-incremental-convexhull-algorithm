@@ -139,7 +139,7 @@ struct EdgeData
     to_be_removed{false}
   {}
 
-  void LinkAdjFace(Face* face)
+  void link_face(Face* face)
   {
     assert(adjface1 == nullptr || adjface2 == nullptr);
 
@@ -175,7 +175,7 @@ using edge_map = std::map<Edge, EdgeData, edge_cmp>;
 inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, Face& face)
 {
   auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
-  i.first->second.LinkAdjFace(&face);
+  i.first->second.link_face(&face);
 }
 
 // for face(a,b,c) and edge(a,c), return b

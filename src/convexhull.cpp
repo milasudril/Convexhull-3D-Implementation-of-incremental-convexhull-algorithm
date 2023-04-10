@@ -48,7 +48,7 @@ void ConvexHull::insert_face(std::pair<Edge const, EdgeData>& current_edge, vert
   faces.emplace_back(make_oriented_face(std::data(std::as_const(*this).pointcloud), a, b, c, ref));
   auto& new_face = this->faces.back();
 
-  current_edge.second.LinkAdjFace(&new_face);
+  current_edge.second.link_face(&new_face);
   create_and_link_edge(edges, a, c, new_face);
   create_and_link_edge(edges, b, c, new_face);
 }
