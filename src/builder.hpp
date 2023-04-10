@@ -32,13 +32,10 @@ the book Computational Geometry in C by O'Rourke */
 #include "./point.hpp"
 #include "./mesh_classes.hpp"
 
-#include <vector>
-#include <string>
 #include <map>
 #include <list>
 #include <span>
 #include <bit>
-#include <cassert>
 #include <functional>
 
 namespace convhull
