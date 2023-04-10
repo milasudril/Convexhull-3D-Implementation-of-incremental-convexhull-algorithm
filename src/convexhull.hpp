@@ -45,7 +45,7 @@ class vertex_index
 public:
   constexpr explicit vertex_index(uint32_t val):m_value{val}{}
 
-  constexpr explicit vertex_index(Point3D const* ptr, Point3D const* base):
+  constexpr explicit vertex_index(point_3d const* ptr, point_3d const* base):
     m_value{static_cast<uint32_t>(ptr - base)}
   {}
 
@@ -58,12 +58,12 @@ private:
   uint32_t m_value;
 };
 
-constexpr auto operator+(Point3D* ptr, vertex_index vi)
+constexpr auto operator+(point_3d* ptr, vertex_index vi)
 {
   return ptr + vi.value();
 }
 
-constexpr auto operator+(Point3D const* ptr, vertex_index vi)
+constexpr auto operator+(point_3d const* ptr, vertex_index vi)
 {
   return ptr + vi.value();
 }
@@ -80,9 +80,9 @@ struct face
 
 // A point is considered outside of a CCW face if the volume of tetrahedron
 // formed by the face and point is negative. Note that origin is set at p.
-inline auto VolumeSign(Point3D const* vert_array, face const& f, Point3D p)
+inline auto VolumeSign(point_3d const* vert_array, face const& f, point_3d p)
 {
-  std::array<Point3D, 3> const vertices{
+  std::array<point_3d, 3> const vertices{
     *(vert_array + f.vertices[0]),
     *(vert_array + f.vertices[1]),
     *(vert_array + f.vertices[2])
@@ -104,11 +104,11 @@ inline auto VolumeSign(Point3D const* vert_array, face const& f, Point3D p)
   return vol < 0 ? -1 : 1;
 }
 
-inline auto make_oriented_face(Point3D const* vert_array,
+inline auto make_oriented_face(point_3d const* vert_array,
   vertex_index a,
   vertex_index b,
   vertex_index c,
-  Point3D ref)
+  point_3d ref)
 {
   face ret{a, b, c};
   if(VolumeSign(vert_array, ret, ref) < 0)
@@ -196,19 +196,19 @@ inline auto find_inner_point(const face& f, const edge& e)
 class ConvexHull
 {
   public:
-    explicit ConvexHull(std::span<Point3D const> points):
+    explicit ConvexHull(std::span<point_3d const> points):
       m_visited(std::size(points), 0)
     { create(points); }
 
     std::list<face> const& faces() const {return m_faces;}
 
   private:
-    void insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, Point3D inner_pt);
-    void insert_face(Point3D const* vert_array, std::pair<edge const, edge_data>& current_edge, vertex_index c, Point3D inner_pt);
+    void insert_face(point_3d const* vert_array, vertex_index a, vertex_index b, vertex_index c, point_3d inner_pt);
+    void insert_face(point_3d const* vert_array, std::pair<edge const, edge_data>& current_edge, vertex_index c, point_3d inner_pt);
 
-    void create_seed(std::span<Point3D const> pointcloud);
-    void try_insert(Point3D const* vert_array, std::reference_wrapper<Point3D const> p);
-    void create(std::span<Point3D const> pointcloud);
+    void create_seed(std::span<point_3d const> pointcloud);
+    void try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> p);
+    void create(std::span<point_3d const> pointcloud);
 
     std::vector<int8_t> m_visited;
     std::list<face> m_faces;

@@ -12,15 +12,15 @@ struct face_indirect
   std::array<uint32_t, 3> vertices;
 };
 
-std::vector<Point3D> load_points(FILE* stream)
+std::vector<point_3d> load_points(FILE* stream)
 {
-  std::vector<Point3D> ret;
+  std::vector<point_3d> ret;
   enum class state{newline, skipline, vertex_begin, coords};
   auto current_state = state::newline;
 
   std::string buffer;
   size_t fieldcount = 0;
-  Point3D point;
+  point_3d point;
 
   while(true)
   {

@@ -30,7 +30,7 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <stdexcept>
 
-void ConvexHull::insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, Point3D ref)
+void ConvexHull::insert_face(point_3d const* vert_array, vertex_index a, vertex_index b, vertex_index c, point_3d ref)
 {
   m_faces.emplace_back(make_oriented_face(vert_array, a, b, c, ref));
   auto& new_face = m_faces.back();
@@ -40,10 +40,10 @@ void ConvexHull::insert_face(Point3D const* vert_array, vertex_index a, vertex_i
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::insert_face(Point3D const* vert_array,
+void ConvexHull::insert_face(point_3d const* vert_array,
   std::pair<edge const, edge_data>& current_edge,
   vertex_index c,
-  Point3D ref)
+  point_3d ref)
 {
   auto const a = current_edge.first.endpoints[0];
   auto const b = current_edge.first.endpoints[1];
@@ -56,14 +56,14 @@ void ConvexHull::insert_face(Point3D const* vert_array,
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::create_seed(std::span<Point3D const> points)
+void ConvexHull::create_seed(std::span<point_3d const> points)
 {
   auto const n = points.size();
   if(n <= 3)
   { throw std::runtime_error{"To few points in input data"}; }
 
   uint32_t i = 2;
-  while(Colinear(points[i], points[i - 1], points[i - 2]))
+  while(colinear(points[i], points[i - 1], points[i - 2]))
   {
     if(i++ == n - 1)
     { throw std::runtime_error{"All points are colinear"}; }
@@ -96,7 +96,7 @@ void ConvexHull::create_seed(std::span<Point3D const> points)
   insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D cam_loc)
+size_t mark_visible_faces(std::list<face>& faces, point_3d const* points, point_3d cam_loc)
 {
   size_t ret = 0;
 
@@ -112,7 +112,7 @@ size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D
   return ret;
 }
 
-void ConvexHull::try_insert(Point3D const* vert_array, std::reference_wrapper<Point3D const> pt)
+void ConvexHull::try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> pt)
 {
   if(mark_visible_faces(m_faces, vert_array, pt) == 0)
   { return; }
@@ -168,7 +168,7 @@ void remove_hidden(std::list<face>& faces)
   }
 }
 
-void ConvexHull::create(std::span<Point3D const> points)
+void ConvexHull::create(std::span<point_3d const> points)
 {
   create_seed(points);
 
