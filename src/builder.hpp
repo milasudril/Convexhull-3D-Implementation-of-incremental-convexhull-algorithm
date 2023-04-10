@@ -41,58 +41,66 @@ the book Computational Geometry in C by O'Rourke */
 #include <cassert>
 #include <functional>
 
-namespace convhull::detail
-{
-  struct edge_cmp
-  {
-    size_t operator()(edge const& a, edge const& b) const
-    {
-      auto const a_bits = std::bit_cast<size_t>(a);
-      auto const b_bits = std::bit_cast<size_t>(b);
-      return a_bits < b_bits;
-    }
-  };
-}
-
 namespace convhull
 {
-  using edge_map = std::map<edge, edge_data, detail::edge_cmp>;
+	namespace detail
+	{
+		struct edge_cmp
+		{
+			size_t operator()(edge const& a, edge const& b) const
+			{
+				auto const a_bits = std::bit_cast<size_t>(a);
+				auto const b_bits = std::bit_cast<size_t>(b);
+				return a_bits < b_bits;
+			}
+		};
+	}
 
-  inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, face& face)
-  {
-    auto const i = edges.insert(std::pair{edge{p1, p2}, edge_data{}});
-    i.first->second.link_face(&face);
-  }
+	using edge_map = std::map<edge, edge_data, detail::edge_cmp>;
 
-  using face_list = std::list<face>;
+	inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, face& face)
+	{
+		auto const i = edges.insert(std::pair{edge{p1, p2}, edge_data{}});
+		i.first->second.link_face(&face);
+	}
 
-  size_t mark_visible_faces(face_list& faces, point_3d const* points, point_3d cam_loc);
+	using face_list = std::list<face>;
 
-  void cleanup(edge_map& edges);
+	size_t mark_visible_faces(face_list& faces, point_3d const* points, point_3d cam_loc);
 
-  void remove_hidden(face_list& faces);
+	void cleanup(edge_map& edges);
 
-  class builder
-  {
-    public:
-      explicit builder(std::span<point_3d const> points):
-        m_visited(std::size(points), 0)
-      { create(points); }
+	void remove_hidden(face_list& faces);
 
-      face_list const& faces() const {return m_faces;}
+	class builder
+	{
+		public:
+			explicit builder(std::span<point_3d const> points):
+				m_visited(std::size(points), 0)
+			{ create(points); }
 
-    private:
-      void insert_face(point_3d const* vert_array, vertex_index a, vertex_index b, vertex_index c, point_3d inner_pt);
-      void insert_face(point_3d const* vert_array, std::pair<edge const, edge_data>& current_edge, vertex_index c, point_3d inner_pt);
+			face_list const& faces() const {return m_faces;}
 
-      void create_seed(std::span<point_3d const> pointcloud);
-      void try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> p);
-      void create(std::span<point_3d const> pointcloud);
+		private:
+			void insert_face(point_3d const* vert_array,
+				vertex_index a,
+				vertex_index b,
+				vertex_index c,
+				point_3d inner_pt);
 
-      std::vector<int8_t> m_visited;
-      face_list m_faces;
-      edge_map m_edges;
-  };
+			void insert_face(point_3d const* vert_array,
+				std::pair<edge const, edge_data>& current_edge,
+				vertex_index c,
+				point_3d inner_pt);
+
+			void create_seed(std::span<point_3d const> pointcloud);
+			void try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> p);
+			void create(std::span<point_3d const> pointcloud);
+
+			std::vector<int8_t> m_visited;
+			face_list m_faces;
+			edge_map m_edges;
+	};
 }
 
 #endif
