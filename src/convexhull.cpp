@@ -140,7 +140,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
 
     // This edge is to be removed because two adjacent faces will be removed
     else if(face1->visible && face2->visible)
-    { edge.second.remove = true; }
+    { edge.second.to_be_removed = true; }
 
     // Edge on the boundary of visibility, which will be used to extend a tangent
     // cone surface.
@@ -174,10 +174,8 @@ void ConvexHull::CleanUp()
   auto it_edge = this->edges.begin();
   while(it_edge != this->edges.end())
   {
-    if(it_edge->second.remove)
-    {
-      it_edge = this->edges.erase(it_edge);
-    }
+    if(it_edge->second.to_be_removed)
+    { it_edge = this->edges.erase(it_edge); }
     else
     { ++it_edge; }
   }

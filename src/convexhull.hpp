@@ -123,7 +123,7 @@ struct EdgeData
   explicit EdgeData():
     adjface1{nullptr},
     adjface2{nullptr},
-    remove{false}
+    to_be_removed{false}
   {}
 
   void LinkAdjFace(Face* face)
@@ -144,7 +144,7 @@ struct EdgeData
 
   Face* adjface1;
   Face* adjface2;
-  bool remove;
+  bool to_be_removed;
 };
 
 
