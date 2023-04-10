@@ -183,7 +183,7 @@ inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index 
 }
 
 // for face(a,b,c) and edge(a,c), return b
-inline auto FindInnerPoint(const face& f, const edge& e)
+inline auto find_inner_point(const face& f, const edge& e)
 {
   for(size_t i = 0; i != std::size(f.vertices); i++)
   {

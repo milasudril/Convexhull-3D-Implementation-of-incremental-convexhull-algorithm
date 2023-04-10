@@ -137,7 +137,7 @@ void ConvexHull::try_insert(Point3D const* vert_array, Point3D const& pt)
     {
       if(face1->visible)
       { std::swap(face1, face2); }
-      auto const inner_pt = FindInnerPoint(*face2, edge.first);
+      auto const inner_pt = find_inner_point(*face2, edge.first);
       edge.second.erase(face2);
       this->insert_face(
         vert_array,
