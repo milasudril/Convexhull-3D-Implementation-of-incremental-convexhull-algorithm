@@ -33,9 +33,7 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <vector>
 #include <string>
-#include <iostream>
 #include <map>
-#include <unordered_set>
 #include <list>
 #include <span>
 #include <bit>
@@ -182,7 +180,7 @@ class ConvexHull
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 
-    bool BuildFirstHull(std::span<Point3D> pointcloud);
+    void BuildFirstHull(std::span<Point3D> pointcloud);
     // Build a tetrahedron as first convex hull
 
     void IncreHull(const Point3D& p);

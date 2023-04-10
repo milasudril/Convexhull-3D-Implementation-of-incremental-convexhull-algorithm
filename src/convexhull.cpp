@@ -28,6 +28,8 @@ the book Computational Geometry in C by O'Rourke */
 
 #include "./convexhull.hpp"
 
+#include <stdexcept>
+
 void ConvexHull::AddOneFace(vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt)
 {
   // Make sure face is CCW with face normal pointing outward
@@ -72,35 +74,26 @@ void ConvexHull::AddOneFace(std::pair<Edge const, EdgeData>& current_edge, verte
   create_edge(b, c);
 }
 
-bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
+void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
 {
   auto const n = pointcloud.size();
   if(n <= 3)
-  {
-    std::cout<<"Tetrahedron: points.size() < 4\n";
-    return false;
-  }
+  { throw std::runtime_error{"To few points in input data"}; }
 
   uint32_t i = 2;
   while(Colinear(pointcloud[i], pointcloud[i - 1], pointcloud[i - 2]))
   {
     if(i++ == n - 1)
-    {
-      std::cout<<"Tetrahedron: All points are colinear!\n";
-      return false;
-    }
+    { throw std::runtime_error{"All points are colinear"}; }
   }
 
-  Face face{vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}};
+  Face const face{vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}};
 
   auto j = i;
   while(!VolumeSign(std::data(std::as_const(*this).pointcloud), face, pointcloud[j]))
   {
     if(j++ == n-1)
-    {
-      std::cout<<"Tetrahedron: All pointcloud are coplanar!\n";
-      return false;
-    }
+    { throw std::runtime_error{"All pointcloud are coplanar"}; }
   }
 
   auto& p1 = pointcloud[i];    auto& p2 = pointcloud[i - 1];
@@ -110,8 +103,6 @@ bool ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
   this->AddOneFace(vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
   this->AddOneFace(vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
   this->AddOneFace(vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
-  return true;
-
 }
 
 void ConvexHull::IncreHull(const Point3D& pt)
@@ -163,7 +154,8 @@ void ConvexHull::IncreHull(const Point3D& pt)
 
 void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
 {
-  if(!this->BuildFirstHull(pointcloud)) return;
+  this->BuildFirstHull(pointcloud);
+
   for(const auto& pt : pointcloud)
   {
     if(pt.processed) continue;
