@@ -95,13 +95,13 @@ void ConvexHull::create_seed(std::span<Point3D> pointcloud)
   insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-size_t mark_visible_faces(std::list<face>& faces, std::span<Point3D const> points, Point3D const& ref)
+size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D const& ref)
 {
   size_t ret = 0;
 
   for(auto& face : faces)
   {
-    if(VolumeSign(std::data(points), face, ref) < 0)
+    if(VolumeSign(points, face, ref) < 0)
     {
       ++ret;
       face.visible = true;
@@ -111,12 +111,10 @@ size_t mark_visible_faces(std::list<face>& faces, std::span<Point3D const> point
   return ret;
 }
 
-void ConvexHull::IncreHull(const Point3D& pt)
+void ConvexHull::try_insert(Point3D const* vert_array, Point3D const& pt)
 {
-  if(mark_visible_faces(m_faces, m_vertices, pt) == 0)
+  if(mark_visible_faces(m_faces, vert_array, pt) == 0)
   { return; }
-
-  auto const vert_array = std::data(m_vertices);
 
   // Find the edges to make new tangent surface or to be removed
   for(auto it = m_edges.begin(); it != m_edges.end(); ++it)
@@ -158,7 +156,8 @@ void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
   {
     if(pt.processed)
     { continue; }
-    this->IncreHull(pt);
+
+    try_insert(std::data(pointcloud), pt);
     this->CleanUp();
   }
 }

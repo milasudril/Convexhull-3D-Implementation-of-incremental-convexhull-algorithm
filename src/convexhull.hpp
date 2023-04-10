@@ -199,7 +199,6 @@ class ConvexHull
 {
   public:
     template<typename T> ConvexHull(const std::vector<T>& points);
-    // All major works are conducted upon calling of constructor
 
     ~ConvexHull() = default;
 
@@ -211,12 +210,9 @@ class ConvexHull
   private:
     void insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
     void insert_face(Point3D const* vert_array, std::pair<edge const, edgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
-    // Inner point is used to make the orientation of face consistent in counter-
-    // clockwise direction
 
     void create_seed(std::span<Point3D> pointcloud);
-
-    void IncreHull(const Point3D& p);
+    void try_insert(Point3D const* vert_array, const Point3D& p);
 
     void ConstructHull(std::span<Point3D> pointcloud);
 
