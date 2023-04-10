@@ -119,21 +119,21 @@ inline auto make_oriented_face(Point3D const* vert_array,
   return ret;
 }
 
-struct Edge
+struct edge
 {
-  constexpr explicit Edge(vertex_index p1, vertex_index p2):
+  constexpr explicit edge(vertex_index p1, vertex_index p2):
     endpoints{p1, p2}
   {}
 
   std::array<vertex_index, 2> endpoints;
 
-  constexpr bool operator==(Edge const&) const = default;
-  constexpr bool operator!=(Edge const&) const = default;
+  constexpr bool operator==(edge const&) const = default;
+  constexpr bool operator!=(edge const&) const = default;
 };
 
-struct EdgeData
+struct edgeData
 {
-  explicit EdgeData():
+  explicit edgeData():
     adjface1{nullptr},
     adjface2{nullptr},
     to_be_removed{false}
@@ -166,7 +166,7 @@ struct EdgeData
 
 struct edge_cmp
 {
-  size_t operator()(Edge const& a, Edge const& b) const
+  size_t operator()(edge const& a, edge const& b) const
   {
     auto const a_bits = std::bit_cast<size_t>(a);
     auto const b_bits = std::bit_cast<size_t>(b);
@@ -174,16 +174,16 @@ struct edge_cmp
   }
 };
 
-using edge_map = std::map<Edge, EdgeData, edge_cmp>;
+using edge_map = std::map<edge, edgeData, edge_cmp>;
 
 inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, face& face)
 {
-  auto const i = edges.insert(std::pair{Edge{p1, p2}, EdgeData{}});
+  auto const i = edges.insert(std::pair{edge{p1, p2}, edgeData{}});
   i.first->second.link_face(&face);
 }
 
 // for face(a,b,c) and edge(a,c), return b
-inline auto FindInnerPoint(const face& f, const Edge& e)
+inline auto FindInnerPoint(const face& f, const edge& e)
 {
   for(size_t i = 0; i != std::size(f.vertices); i++)
   {
@@ -210,7 +210,7 @@ class ConvexHull
 
   private:
     void insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
-    void insert_face(Point3D const* vert_array, std::pair<Edge const, EdgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
+    void insert_face(Point3D const* vert_array, std::pair<edge const, edgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 

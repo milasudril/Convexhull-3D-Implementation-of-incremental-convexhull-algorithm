@@ -40,7 +40,7 @@ void ConvexHull::insert_face(Point3D const* vert_array, vertex_index a, vertex_i
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::insert_face(Point3D const* vert_array, std::pair<Edge const, EdgeData>& current_edge,
+void ConvexHull::insert_face(Point3D const* vert_array, std::pair<edge const, edgeData>& current_edge,
   vertex_index c,
   const Point3D& ref)
 {
@@ -126,7 +126,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
     else if(face1->visible && face2->visible)
     { edge.second.to_be_removed = true; }
 
-    // Edge on the boundary of visibility, which will be used to extend a tangent
+    // edge on the boundary of visibility, which will be used to extend a tangent
     // cone surface.
     else if(face1->visible || face2->visible)
     {
