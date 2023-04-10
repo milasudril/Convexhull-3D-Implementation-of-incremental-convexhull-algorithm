@@ -117,9 +117,8 @@ void ConvexHull::try_insert(Point3D const* vert_array, Point3D const& pt)
   { return; }
 
   // Find the edges to make new tangent surface or to be removed
-  for(auto it = m_edges.begin(); it != m_edges.end(); ++it)
+  for(auto& edge: m_edges)
   {
-    auto& edge = *it;
     auto& face1 = edge.second.adjface1;
     auto& face2 = edge.second.adjface2;
 
@@ -139,11 +138,7 @@ void ConvexHull::try_insert(Point3D const* vert_array, Point3D const& pt)
       { std::swap(face1, face2); }
       auto const inner_pt = find_inner_point(*face2, edge.first);
       edge.second.erase(face2);
-      this->insert_face(
-        vert_array,
-        edge,
-        vertex_index{&pt, vert_array},
-        *(vert_array + inner_pt));
+      insert_face(vert_array, edge, vertex_index{&pt, vert_array}, *(vert_array + inner_pt));
     }
   }
 }
