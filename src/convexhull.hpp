@@ -82,25 +82,22 @@ struct face
 // formed by the face and point is negative. Note that origin is set at p.
 inline auto VolumeSign(Point3D const* vert_array, face const& f, Point3D p)
 {
-  double vol;
-  double ax, ay, az, bx, by, bz, cx, cy, cz;
-
   std::array<Point3D, 3> const vertices{
     *(vert_array + f.vertices[0]),
     *(vert_array + f.vertices[1]),
     *(vert_array + f.vertices[2])
   };
 
-  ax = vertices[0].x - p.x;
-  ay = vertices[0].y - p.y;
-  az = vertices[0].z - p.z;
-  bx = vertices[1].x - p.x;
-  by = vertices[1].y - p.y;
-  bz = vertices[1].z - p.z;
-  cx = vertices[2].x - p.x;
-  cy = vertices[2].y - p.y;
-  cz = vertices[2].z - p.z;
-  vol = ax * (by * cz - bz * cy) +\
+  auto const ax = vertices[0].x - p.x;
+  auto const ay = vertices[0].y - p.y;
+  auto const az = vertices[0].z - p.z;
+  auto const bx = vertices[1].x - p.x;
+  auto const by = vertices[1].y - p.y;
+  auto const bz = vertices[1].z - p.z;
+  auto const cx = vertices[2].x - p.x;
+  auto const cy = vertices[2].y - p.y;
+  auto const cz = vertices[2].z - p.z;
+  auto const vol = ax * (by * cz - bz * cy) +\
         ay * (bz * cx - bx * cz) +\
         az * (bx * cy - by * cx);
   if(vol == 0) return 0;

@@ -96,13 +96,13 @@ void ConvexHull::create_seed(std::span<Point3D const> points)
   insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D ref)
+size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D cam_loc)
 {
   size_t ret = 0;
 
   for(auto& face : faces)
   {
-    if(VolumeSign(points, face, ref) < 0)
+    if(VolumeSign(points, face, cam_loc) < 0)
     {
       ++ret;
       face.visible = true;
