@@ -1,3 +1,6 @@
+#ifndef CONVHULL_POINT_HPP
+#define CONVHULL_POINT_HPP
+
 struct point_3d
 {
   float x;
@@ -18,3 +21,5 @@ inline bool colinear(point_3d a, point_3d b, point_3d c)
          ((b.x - a.x) * (c.y - a.y) -
           (b.y - a.y) * (c.x - a.x)) == 0;
 }
+
+#endif

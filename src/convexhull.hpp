@@ -29,7 +29,7 @@ the book Computational Geometry in C by O'Rourke */
 #ifndef CONVEXHULL_HPP
 #define CONVEXHULL_HPP
 
-#include "./utility.hpp"
+#include "./point.hpp"
 
 #include <vector>
 #include <string>
