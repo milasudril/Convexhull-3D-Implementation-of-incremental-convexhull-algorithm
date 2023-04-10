@@ -7,15 +7,15 @@
 #include <algorithm>
 #include <optional>
 
-std::vector<point_3d> load_points(FILE* stream)
+std::vector<convhull::point_3d> load_points(FILE* stream)
 {
-  std::vector<point_3d> ret;
+  std::vector<convhull::point_3d> ret;
   enum class state{newline, skipline, vertex_begin, coords};
   auto current_state = state::newline;
 
   std::string buffer;
   size_t fieldcount = 0;
-  point_3d point;
+  convhull::point_3d point;
 
   while(true)
   {
@@ -125,7 +125,7 @@ int main()
 {
   auto const points = load_points(stdin);
 
-  ConvexHull C{points};
+  convhull::ConvexHull C{points};
 
   std::ranges::for_each(points, [](auto const& item){
     printf("v %.8g %.8g %.8g\n", item.x, item.y, item.z);

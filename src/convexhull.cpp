@@ -30,7 +30,7 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <stdexcept>
 
-void ConvexHull::insert_face(point_3d const* vert_array, vertex_index a, vertex_index b, vertex_index c, point_3d ref)
+void convhull::ConvexHull::insert_face(point_3d const* vert_array, vertex_index a, vertex_index b, vertex_index c, point_3d ref)
 {
   m_faces.emplace_back(make_oriented_face(vert_array, a, b, c, ref));
   auto& new_face = m_faces.back();
@@ -40,7 +40,7 @@ void ConvexHull::insert_face(point_3d const* vert_array, vertex_index a, vertex_
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::insert_face(point_3d const* vert_array,
+void convhull::ConvexHull::insert_face(point_3d const* vert_array,
   std::pair<edge const, edge_data>& current_edge,
   vertex_index c,
   point_3d ref)
@@ -56,7 +56,7 @@ void ConvexHull::insert_face(point_3d const* vert_array,
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::create_seed(std::span<point_3d const> points)
+void convhull::ConvexHull::create_seed(std::span<point_3d const> points)
 {
   auto const n = points.size();
   if(n <= 3)
@@ -96,7 +96,7 @@ void ConvexHull::create_seed(std::span<point_3d const> points)
   insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-size_t mark_visible_faces(std::list<face>& faces, point_3d const* points, point_3d cam_loc)
+size_t convhull::mark_visible_faces(std::list<face>& faces, point_3d const* points, point_3d cam_loc)
 {
   size_t ret = 0;
 
@@ -112,7 +112,7 @@ size_t mark_visible_faces(std::list<face>& faces, point_3d const* points, point_
   return ret;
 }
 
-void ConvexHull::try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> pt)
+void convhull::ConvexHull::try_insert(point_3d const* vert_array, std::reference_wrapper<point_3d const> pt)
 {
   if(mark_visible_faces(m_faces, vert_array, pt) == 0)
   { return; }
@@ -144,7 +144,7 @@ void ConvexHull::try_insert(point_3d const* vert_array, std::reference_wrapper<p
   }
 }
 
-void cleanup(edge_map& edges)
+void convhull::cleanup(edge_map& edges)
 {
   auto it_edge = edges.begin();
   while(it_edge != edges.end())
@@ -156,7 +156,7 @@ void cleanup(edge_map& edges)
   }
 }
 
-void remove_hidden(std::list<face>& faces)
+void convhull::remove_hidden(std::list<face>& faces)
 {
   auto it_face = faces.begin();
   while(it_face != faces.end())
@@ -168,7 +168,7 @@ void remove_hidden(std::list<face>& faces)
   }
 }
 
-void ConvexHull::create(std::span<point_3d const> points)
+void convhull::ConvexHull::create(std::span<point_3d const> points)
 {
   create_seed(points);
 
