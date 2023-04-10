@@ -39,6 +39,20 @@ the book Computational Geometry in C by O'Rourke */
 #include <list>
 #include <span>
 
+class vertex_index
+{
+public:
+  constexpr explicit vertex_index(uint32_t val):m_value{val}{}
+
+  constexpr bool operator==(vertex_index const&) = default;
+  constexpr bool operator!=(vertex_index const&) = default;
+
+  constexpr auto value() const { return m_value; }
+
+private:
+  uint32_t m_value;
+};
+
 // Defined in CCW
 struct Face
 {
