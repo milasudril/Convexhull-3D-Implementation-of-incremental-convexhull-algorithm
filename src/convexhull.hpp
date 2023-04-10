@@ -219,15 +219,5 @@ template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
   }
   this->ConstructHull(this->pointcloud);
 }
-#if 0
-template<typename T> bool ConvexHull::Contains(T p) const
-{
-  Point3D pt(p.x, p.y, p.z);
-  for(auto& face : this->faces)
-  {
-    if(VolumeSign(face, pt) <= 0) return false;
-  }
-  return true;
-}
-#endif
+
 #endif
