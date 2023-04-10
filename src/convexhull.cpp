@@ -76,7 +76,8 @@ void ConvexHull::AddOneFace(Edge& current_edge, vertex_index c, const Point3D& i
     }
     this->map_edges[key]->LinkAdjFace(&new_face);
   };
-  create_edge(a, b);
+
+  current_edge.LinkAdjFace(&new_face);
   create_edge(a, c);
   create_edge(b, c);
 }
