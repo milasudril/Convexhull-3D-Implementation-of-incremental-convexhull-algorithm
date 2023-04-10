@@ -148,6 +148,30 @@ void ConvexHull::try_insert(Point3D const* vert_array, Point3D const& pt)
   }
 }
 
+void cleanup(edge_map& edges)
+{
+  auto it_edge = edges.begin();
+  while(it_edge != edges.end())
+  {
+    if(it_edge->second.to_be_removed)
+    { it_edge = edges.erase(it_edge); }
+    else
+    { ++it_edge; }
+  }
+}
+
+void remove_hidden(std::list<face>& faces)
+{
+  auto it_face = faces.begin();
+  while(it_face != faces.end())
+  {
+    if(it_face->visible)
+    { it_face = faces.erase(it_face); }
+    else
+    { ++it_face; }
+  }
+}
+
 void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
 {
   create_seed(pointcloud);
@@ -158,31 +182,7 @@ void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
     { continue; }
 
     try_insert(std::data(pointcloud), pt);
-    this->CleanUp();
-  }
-}
-
-void ConvexHull::CleanUp()
-{
-  auto it_edge = m_edges.begin();
-  while(it_edge != m_edges.end())
-  {
-    if(it_edge->second.to_be_removed)
-    { it_edge = m_edges.erase(it_edge); }
-    else
-    { ++it_edge; }
-  }
-
-  auto it_face = m_faces.begin();
-  while(it_face != m_faces.end())
-  {
-    if(it_face->visible)
-    {
-      it_face = m_faces.erase(it_face);
-    }
-    else
-    {
-      ++it_face;
-    }
+    cleanup(m_edges);
+    remove_hidden(m_faces);
   }
 }

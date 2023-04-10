@@ -216,8 +216,6 @@ class ConvexHull
 
     void ConstructHull(std::span<Point3D> pointcloud);
 
-    void CleanUp();
-
     std::vector<Point3D> m_vertices;
     std::list<face> m_faces;
     edge_map m_edges;
