@@ -55,7 +55,7 @@ void ConvexHull::insert_face(Point3D const* vert_array, std::pair<edge const, ed
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
+void ConvexHull::create_seed(std::span<Point3D> pointcloud)
 {
   auto const n = pointcloud.size();
   if(n <= 3)
@@ -79,13 +79,20 @@ void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
     { throw std::runtime_error{"All pointcloud are coplanar"}; }
   }
 
-  auto& p1 = pointcloud[i];    auto& p2 = pointcloud[i - 1];
-  auto& p3 = pointcloud[i - 2];  auto& p4 = pointcloud[j];
-  p1.processed = p2.processed = p3.processed = p4.processed = true;
-  this->insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
-  this->insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
-  this->insert_face(vert_array, vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
-  this->insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
+  auto& p1 = pointcloud[i];
+  auto& p2 = pointcloud[i - 1];
+  auto& p3 = pointcloud[i - 2];
+  auto& p4 = pointcloud[j];
+
+  p1.processed = true;
+  p2.processed = true;
+  p3.processed = true;
+  p4.processed = true;
+
+  insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}, p4);
+  insert_face(vert_array, vertex_index{i}, vertex_index{i - 1}, vertex_index{j}, p3);
+  insert_face(vert_array, vertex_index{i}, vertex_index{i - 2}, vertex_index{j}, p2);
+  insert_face(vert_array, vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
 size_t mark_visible_faces(std::list<face>& faces, std::span<Point3D const> points, Point3D const& ref)
@@ -145,11 +152,12 @@ void ConvexHull::IncreHull(const Point3D& pt)
 
 void ConvexHull::ConstructHull(std::span<Point3D> pointcloud)
 {
-  this->BuildFirstHull(pointcloud);
+  create_seed(pointcloud);
 
   for(const auto& pt : pointcloud)
   {
-    if(pt.processed) continue;
+    if(pt.processed)
+    { continue; }
     this->IncreHull(pt);
     this->CleanUp();
   }

@@ -214,8 +214,7 @@ class ConvexHull
     // Inner point is used to make the orientation of face consistent in counter-
     // clockwise direction
 
-    void BuildFirstHull(std::span<Point3D> pointcloud);
-    // Build a tetrahedron as first convex hull
+    void create_seed(std::span<Point3D> pointcloud);
 
     void IncreHull(const Point3D& p);
 
@@ -239,7 +238,7 @@ template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points)
     m_vertices[i].z = points[i].z;
   }
 
-  this->ConstructHull(m_vertices);
+  ConstructHull(m_vertices);
 }
 
 #endif
