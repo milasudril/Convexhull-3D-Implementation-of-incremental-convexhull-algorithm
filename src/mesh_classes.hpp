@@ -58,19 +58,20 @@ namespace convhull
 			*(vert_array + f.vertices[2])
 		};
 
-		auto const ax = vertices[0].x - p.x;
-		auto const ay = vertices[0].y - p.y;
-		auto const az = vertices[0].z - p.z;
-		auto const bx = vertices[1].x - p.x;
-		auto const by = vertices[1].y - p.y;
-		auto const bz = vertices[1].z - p.z;
-		auto const cx = vertices[2].x - p.x;
-		auto const cy = vertices[2].y - p.y;
-		auto const cz = vertices[2].z - p.z;
-		auto const vol = ax * (by * cz - bz * cy) +\
+		auto const a = vertices[0] - p;
+		auto const b = vertices[1] - p;
+		auto const c = vertices[2] - p;
+
+		auto const vol = inner_product(a, cross(b, c));
+#if 0
+		ax * (by * cz - bz * cy) +
 					ay * (bz * cx - bx * cz) +\
 					az * (bx * cy - by * cx);
-		if(vol == 0) return 0;
+#endif
+
+		if(vol == 0)
+		{ return 0; }
+
 		return vol < 0 ? -1 : 1;
 	}
 

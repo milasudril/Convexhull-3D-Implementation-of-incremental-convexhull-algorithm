@@ -14,7 +14,7 @@ std::vector<convhull::point_3d> load_points(FILE* stream)
 
 	std::string buffer;
 	size_t fieldcount = 0;
-	convhull::point_3d point;
+	std::array<float, 3> point;
 
 	while(true)
 	{
@@ -22,7 +22,7 @@ std::vector<convhull::point_3d> load_points(FILE* stream)
 		if(ch_in == EOF)
 		{
 			if(fieldcount != 0)
-			{ ret.push_back(point); }
+			{ ret.push_back(convhull::point_3d{point[0], point[1], point[2]}); }
 
 			return ret;
 		}
@@ -80,13 +80,13 @@ std::vector<convhull::point_3d> load_points(FILE* stream)
 						switch(fieldcount)
 						{
 							case 0:
-								point.x = std::stof(buffer);
+								point[0] = std::stof(buffer);
 								break;
 							case 1:
-								point.y = std::stof(buffer);
+								point[1] = std::stof(buffer);
 								break;
 							case 2:
-								point.z = std::stof(buffer);
+								point[2] = std::stof(buffer);
 								break;
 						}
 						buffer.clear();
@@ -97,18 +97,18 @@ std::vector<convhull::point_3d> load_points(FILE* stream)
 						switch(fieldcount)
 						{
 							case 0:
-								point.x = std::stof(buffer);
+								point[0] =  std::stof(buffer);
 								break;
 							case 1:
-								point.y = std::stof(buffer);
+								point[1] =  std::stof(buffer);
 								break;
 							case 2:
-								point.z = std::stof(buffer);
+								point[2] =  std::stof(buffer);
 								break;
 						}
 						buffer.clear();
 						fieldcount = 0;
-						ret.push_back(point);
+						ret.push_back(convhull::point_3d{point[0], point[1], point[2]});
 						current_state = state::newline;
 						break;
 
@@ -127,7 +127,7 @@ int main()
 	convhull::builder builder{points};
 
 	std::ranges::for_each(points, [](auto const& item){
-		printf("v %.8g %.8g %.8g\n", item.x, item.y, item.z);
+		printf("v %.8g %.8g %.8g\n", item[0], item[1], item[2]);
 	});
 
 	std::ranges::for_each(builder.faces(), [](auto const& item) {
