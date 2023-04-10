@@ -128,9 +128,11 @@ std::vector<Point3D> load_points(FILE* stream)
 
 int main()
 {
-  ConvexHull C{load_points(stdin)};
+  auto const points = load_points(stdin);
 
-  std::ranges::for_each(C.GetVertices(), [](auto const& item){
+  ConvexHull C{points};
+
+  std::ranges::for_each(points, [](auto const& item){
     printf("v %.8g %.8g %.8g\n", item.x, item.y, item.z);
   });
 

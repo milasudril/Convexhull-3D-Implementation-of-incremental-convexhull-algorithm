@@ -30,7 +30,7 @@ the book Computational Geometry in C by O'Rourke */
 
 #include <stdexcept>
 
-void ConvexHull::insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, const Point3D& ref)
+void ConvexHull::insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, Point3D ref)
 {
   m_faces.emplace_back(make_oriented_face(vert_array, a, b, c, ref));
   auto& new_face = m_faces.back();
@@ -40,9 +40,10 @@ void ConvexHull::insert_face(Point3D const* vert_array, vertex_index a, vertex_i
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::insert_face(Point3D const* vert_array, std::pair<edge const, edgeData>& current_edge,
+void ConvexHull::insert_face(Point3D const* vert_array,
+  std::pair<edge const, edge_data>& current_edge,
   vertex_index c,
-  const Point3D& ref)
+  Point3D ref)
 {
   auto const a = current_edge.first.endpoints[0];
   auto const b = current_edge.first.endpoints[1];
@@ -55,14 +56,14 @@ void ConvexHull::insert_face(Point3D const* vert_array, std::pair<edge const, ed
   create_and_link_edge(m_edges, b, c, new_face);
 }
 
-void ConvexHull::create_seed(std::span<Point3D> pointcloud)
+void ConvexHull::create_seed(std::span<Point3D const> points)
 {
-  auto const n = pointcloud.size();
+  auto const n = points.size();
   if(n <= 3)
   { throw std::runtime_error{"To few points in input data"}; }
 
   uint32_t i = 2;
-  while(Colinear(pointcloud[i], pointcloud[i - 1], pointcloud[i - 2]))
+  while(Colinear(points[i], points[i - 1], points[i - 2]))
   {
     if(i++ == n - 1)
     { throw std::runtime_error{"All points are colinear"}; }
@@ -70,19 +71,19 @@ void ConvexHull::create_seed(std::span<Point3D> pointcloud)
 
   face const face{vertex_index{i}, vertex_index{i - 1}, vertex_index{i - 2}};
 
-  auto const vert_array = std::data(pointcloud);
+  auto const vert_array = std::data(points);
 
   auto j = i;
-  while(!VolumeSign(vert_array, face, pointcloud[j]))
+  while(!VolumeSign(vert_array, face, points[j]))
   {
     if(j++ == n-1)
     { throw std::runtime_error{"All points are coplanar"}; }
   }
 
-  auto& p1 = pointcloud[i];
-  auto& p2 = pointcloud[i - 1];
-  auto& p3 = pointcloud[i - 2];
-  auto& p4 = pointcloud[j];
+  auto p1 = points[i];
+  auto p2 = points[i - 1];
+  auto p3 = points[i - 2];
+  auto p4 = points[j];
 
   m_visited[i] = 1;
   m_visited[i - 1] = 1;
@@ -111,7 +112,7 @@ size_t mark_visible_faces(std::list<face>& faces, Point3D const* points, Point3D
   return ret;
 }
 
-void ConvexHull::try_insert(Point3D const* vert_array, Point3D const& pt)
+void ConvexHull::try_insert(Point3D const* vert_array, std::reference_wrapper<Point3D const> pt)
 {
   if(mark_visible_faces(m_faces, vert_array, pt) == 0)
   { return; }
@@ -138,7 +139,7 @@ void ConvexHull::try_insert(Point3D const* vert_array, Point3D const& pt)
       { std::swap(face1, face2); }
       auto const inner_pt = find_inner_point(*face2, edge.first);
       edge.second.erase(face2);
-      insert_face(vert_array, edge, vertex_index{&pt, vert_array}, *(vert_array + inner_pt));
+      insert_face(vert_array, edge, vertex_index{&pt.get(), vert_array}, *(vert_array + inner_pt));
     }
   }
 }
@@ -167,16 +168,16 @@ void remove_hidden(std::list<face>& faces)
   }
 }
 
-void ConvexHull::create(std::span<Point3D> pointcloud)
+void ConvexHull::create(std::span<Point3D const> points)
 {
-  create_seed(pointcloud);
+  create_seed(points);
 
-  for(auto const& pt : pointcloud)
+  for(auto const& pt : points)
   {
-    if(m_visited[vertex_index{&pt, std::data(pointcloud)}.value()])
+    if(m_visited[vertex_index{&pt, std::data(points)}.value()])
     { continue; }
 
-    try_insert(std::data(pointcloud), pt);
+    try_insert(std::data(points), pt);
     cleanup(m_edges);
     remove_hidden(m_faces);
   }

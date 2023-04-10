@@ -38,6 +38,7 @@ the book Computational Geometry in C by O'Rourke */
 #include <span>
 #include <bit>
 #include <cassert>
+#include <functional>
 
 class vertex_index
 {
@@ -79,7 +80,7 @@ struct face
 
 // A point is considered outside of a CCW face if the volume of tetrahedron
 // formed by the face and point is negative. Note that origin is set at p.
-inline auto VolumeSign(Point3D const* vert_array, face const& f, Point3D const& p)
+inline auto VolumeSign(Point3D const* vert_array, face const& f, Point3D p)
 {
   double vol;
   double ax, ay, az, bx, by, bz, cx, cy, cz;
@@ -110,7 +111,7 @@ inline auto make_oriented_face(Point3D const* vert_array,
   vertex_index a,
   vertex_index b,
   vertex_index c,
-  Point3D const& ref)
+  Point3D ref)
 {
   face ret{a, b, c};
   if(VolumeSign(vert_array, ret, ref) < 0)
@@ -131,9 +132,9 @@ struct edge
   constexpr bool operator!=(edge const&) const = default;
 };
 
-struct edgeData
+struct edge_data
 {
-  explicit edgeData():
+  explicit edge_data():
     adjface1{nullptr},
     adjface2{nullptr},
     to_be_removed{false}
@@ -174,11 +175,11 @@ struct edge_cmp
   }
 };
 
-using edge_map = std::map<edge, edgeData, edge_cmp>;
+using edge_map = std::map<edge, edge_data, edge_cmp>;
 
 inline void create_and_link_edge(edge_map& edges, vertex_index p1, vertex_index p2, face& face)
 {
-  auto const i = edges.insert(std::pair{edge{p1, p2}, edgeData{}});
+  auto const i = edges.insert(std::pair{edge{p1, p2}, edge_data{}});
   i.first->second.link_face(&face);
 }
 
@@ -198,42 +199,23 @@ inline auto find_inner_point(const face& f, const edge& e)
 class ConvexHull
 {
   public:
-    template<typename T> ConvexHull(const std::vector<T>& points);
+    explicit ConvexHull(std::span<Point3D const> points):
+      m_visited(std::size(points), 0)
+    { create(points); }
 
-    ~ConvexHull() = default;
-
-    const std::list<face>& faces() const {return m_faces;}
-
-    const std::vector<Point3D>& GetVertices() const
-    { return m_vertices; }
+    std::list<face> const& faces() const {return m_faces;}
 
   private:
-    void insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, const Point3D& inner_pt);
-    void insert_face(Point3D const* vert_array, std::pair<edge const, edgeData>& current_edge, vertex_index c, const Point3D& inner_pt);
+    void insert_face(Point3D const* vert_array, vertex_index a, vertex_index b, vertex_index c, Point3D inner_pt);
+    void insert_face(Point3D const* vert_array, std::pair<edge const, edge_data>& current_edge, vertex_index c, Point3D inner_pt);
 
-    void create_seed(std::span<Point3D> pointcloud);
-    void try_insert(Point3D const* vert_array, const Point3D& p);
-    void create(std::span<Point3D> pointcloud);
+    void create_seed(std::span<Point3D const> pointcloud);
+    void try_insert(Point3D const* vert_array, std::reference_wrapper<Point3D const> p);
+    void create(std::span<Point3D const> pointcloud);
 
-    std::vector<Point3D> m_vertices;
     std::vector<int8_t> m_visited;
     std::list<face> m_faces;
     edge_map m_edges;
 };
-
-template<typename T> ConvexHull::ConvexHull(const std::vector<T>& points):
-  m_visited(std::size(points))
-{
-  auto const n = points.size();
-  m_vertices.resize(n);
-  for(size_t i = 0; i != n; i++)
-  {
-    m_vertices[i].x = points[i].x;
-    m_vertices[i].y = points[i].y;
-    m_vertices[i].z = points[i].z;
-  }
-
-  create(m_vertices);
-}
 
 #endif
