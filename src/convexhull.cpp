@@ -105,21 +105,29 @@ void ConvexHull::BuildFirstHull(std::span<Point3D> pointcloud)
   this->AddOneFace(vertex_index{i - 1}, vertex_index{i - 2}, vertex_index{j}, p1);
 }
 
-void ConvexHull::IncreHull(const Point3D& pt)
+size_t mark_visible_faces(std::list<Face>& faces, std::span<Point3D const> points, Point3D const& ref)
 {
-  // Find the illuminated faces (which will be removed later)
-  bool vis = false;
-  for(auto& face : this->faces)
+  size_t ret = 0;
+
+  for(auto& face : faces)
   {
-    if(VolumeSign(std::data(std::as_const(*this).pointcloud), face, pt) < 0)
+    if(VolumeSign(std::data(points), face, ref) < 0)
     {
-      vis = true;
+      ++ret;
       face.visible = true;
     }
   }
-  if(!vis) return;
 
-  // Find the edges to make new tagent surface or to be removed
+  return ret;
+}
+
+void ConvexHull::IncreHull(const Point3D& pt)
+{
+  if(mark_visible_faces(faces, pointcloud, pt) == 0)
+  { return; }
+
+
+  // Find the edges to make new tangent surface or to be removed
   for(auto it = this->edges.begin(); it != this->edges.end(); it++)
   {
     auto& edge = *it;
@@ -128,22 +136,19 @@ void ConvexHull::IncreHull(const Point3D& pt)
 
     // Newly added edge
     if(face1 == nullptr || face2 == nullptr)
-    {
-      continue;
-    }
+    { continue; }
 
     // This edge is to be removed because two adjacent faces will be removed
     else if(face1->visible && face2->visible)
-    {
-      edge.second.remove = true;
-    }
+    { edge.second.remove = true; }
 
-    // Edge on the boundary of visibility, which will be used to extend a tagent
+    // Edge on the boundary of visibility, which will be used to extend a tangent
     // cone surface.
-    else if(face1->visible|| face2->visible)
+    else if(face1->visible || face2->visible)
     {
-      if(face1->visible) std::swap(face1, face2);
-      auto inner_pt = FindInnerPoint(*face2, edge.first);
+      if(face1->visible)
+      { std::swap(face1, face2); }
+      auto const inner_pt = FindInnerPoint(*face2, edge.first);
       edge.second.Erase(face2);
       this->AddOneFace(edge,
         vertex_index{&pt, std::data(std::as_const(*this).pointcloud)},
