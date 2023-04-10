@@ -118,7 +118,7 @@ void ConvexHull::IncreHull(const Point3D& pt)
     auto& face2 = edge.adjface2;
 
     // Newly added edge
-    if(face1 == NULL || face2 == NULL)
+    if(face1 == nullptr || face2 == nullptr)
     {
       continue;
     }
