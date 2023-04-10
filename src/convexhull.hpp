@@ -44,8 +44,12 @@ class vertex_index
 public:
   constexpr explicit vertex_index(uint32_t val):m_value{val}{}
 
-  constexpr bool operator==(vertex_index const&) = default;
-  constexpr bool operator!=(vertex_index const&) = default;
+  constexpr explicit vertex_index(Point3D const* ptr, Point3D const* base):
+    m_value{static_cast<uint32_t>(ptr - base)}
+  {}
+
+  constexpr bool operator==(vertex_index const&) const = default;
+  constexpr bool operator!=(vertex_index const&) const = default;
 
   constexpr auto value() const { return m_value; }
 
